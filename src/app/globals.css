@@ -1,0 +1,213 @@
+@import "tailwindcss";
+
+:root {
+  --background: #060608;
+  --foreground: #F4F4F6;
+  --glass-bg: rgba(20, 20, 25, 0.45);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-border-hover: rgba(255, 255, 255, 0.15);
+  --glass-glow: rgba(255, 255, 255, 0.03);
+  --accent: #FFFFFF;
+  --accent-muted: #8E8E93;
+  --card-blur: 24px;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  overflow-x: hidden;
+  min-height: 100vh;
+  position: relative;
+}
+
+/* Background Glowing Blobs */
+body::before {
+  content: "";
+  position: fixed;
+  top: -10%;
+  left: -10%;
+  width: 50%;
+  height: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.03) 0%, rgba(0, 0, 0, 0) 70%);
+  z-index: -1;
+  pointer-events: none;
+  filter: blur(80px);
+}
+
+body::after {
+  content: "";
+  position: fixed;
+  bottom: -10%;
+  right: -10%;
+  width: 60%;
+  height: 60%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.02) 0%, rgba(0, 0, 0, 0) 70%);
+  z-index: -1;
+  pointer-events: none;
+  filter: blur(100px);
+}
+
+/* Glassmorphism Styles */
+.glass-container {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--card-blur));
+  -webkit-backdrop-filter: blur(var(--card-blur));
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.02);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.2);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-card:hover {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px 0 rgba(0, 0, 0, 0.4);
+}
+
+.glass-input {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: white;
+  transition: all 0.2s ease;
+  border-radius: 12px;
+}
+
+.glass-input:focus {
+  outline: none;
+  border-color: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.06);
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.05);
+}
+
+.glass-button {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: white;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  border-radius: 12px;
+}
+
+.glass-button:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.25);
+  transform: scale(1.02);
+}
+
+.glass-button-primary {
+  background: #FFFFFF;
+  color: #000000;
+  font-weight: 600;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  border-radius: 12px;
+}
+
+.glass-button-primary:hover {
+  background: #EAEAEA;
+  transform: scale(1.02);
+  box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2);
+}
+
+.glass-button-danger {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  color: #F87171;
+  transition: all 0.2s ease;
+  border-radius: 12px;
+}
+
+.glass-button-danger:hover {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.4);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* Status Badges */
+.badge-draft {
+  background: rgba(142, 142, 147, 0.15);
+  color: #D1D1D6;
+  border: 1px solid rgba(142, 142, 147, 0.25);
+}
+
+.badge-approval {
+  background: rgba(234, 179, 8, 0.1);
+  color: #FDE047;
+  border: 1px solid rgba(234, 179, 8, 0.2);
+}
+
+.badge-approved {
+  background: rgba(34, 197, 94, 0.1);
+  color: #86EFAC;
+  border: 1px solid rgba(34, 197, 94, 0.2);
+}
+
+.badge-revision {
+  background: rgba(239, 68, 68, 0.1);
+  color: #FCA5A5;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.badge-published {
+  background: rgba(59, 130, 246, 0.1);
+  color: #93C5FD;
+  border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Glass Tabs */
+.glass-tab {
+  color: var(--accent-muted);
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.glass-tab.active {
+  color: #FFFFFF;
+}
+
+.glass-tab.active::after {
+  content: "";
+  position: absolute;
+  bottom: -8px;
+  left: 10%;
+  right: 10%;
+  height: 2px;
+  background: #FFFFFF;
+  border-radius: 999px;
+  box-shadow: 0 0 8px #FFFFFF;
+}
