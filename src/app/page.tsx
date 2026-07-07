@@ -1334,58 +1334,69 @@ export default function Home() {
                       />
                     </div>
 
-                    <div className="col-span-2">
-                      <span className="text-[10px] text-white/40 block font-medium uppercase tracking-wider mb-1">Asset Google Drive</span>
-                      {activeContentDetail.driveLink ? (
-                        <div className="flex items-center gap-2">
+                    <div className="col-span-2 space-y-2">
+                      <div className="flex justify-between items-center">
+                        <span className="text-[10px] text-white/40 font-medium uppercase tracking-wider">Asset Google Drive</span>
+                        {driveFolder && (
                           <a
-                            href={activeContentDetail.driveLink}
+                            href={driveFolder}
                             target="_blank"
                             rel="noreferrer"
-                            className="text-xs text-blue-400 hover:underline truncate block max-w-[150px]"
+                            className="text-[10px] text-blue-400 hover:underline flex items-center gap-1 font-bold"
                           >
-                            Buka File High-Res
+                            📂 Buka Folder Drive Utama
                           </a>
-                          <button
-                            onClick={() => {
-                              const updated = contents.map((c) =>
-                                c.id === activeContentDetail.id ? { ...c, driveLink: "" } : c
-                              );
-                              saveContentsToStorage(updated);
-                              setActiveContentDetail({ ...activeContentDetail, driveLink: "" });
-                            }}
-                            className="text-[10px] text-red-400 hover:text-red-300 underline"
-                          >
-                            Hapus Link
-                          </button>
-                        </div>
-                      ) : (
-                        <div className="flex flex-col gap-1.5">
-                          <button
-                            onClick={() => {
-                              const userLink = prompt("Masukkan Tautan Google Drive / Video Anda:");
-                              if (userLink) {
+                        )}
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="url"
+                          placeholder={driveFolder ? "Masukkan tautan file video hasil produksi..." : "Masukkan tautan file Google Drive..."}
+                          value={activeContentDetail.driveLink || ""}
+                          onChange={(e) => {
+                            const link = e.target.value;
+                            const updated = contents.map((c) =>
+                              c.id === activeContentDetail.id ? { ...c, driveLink: link } : c
+                            );
+                            saveContentsToStorage(updated);
+                            setActiveContentDetail({ ...activeContentDetail, driveLink: link });
+                          }}
+                          className="flex-1 px-3 py-1.5 bg-black/35 border border-white/10 rounded-xl focus:outline-none focus:border-white/30 text-xs text-white"
+                        />
+                        {activeContentDetail.driveLink && (
+                          <>
+                            <a
+                              href={activeContentDetail.driveLink}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="px-3 py-1.5 bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 border border-blue-500/30 text-xs font-semibold rounded-xl transition shrink-0"
+                            >
+                              Buka
+                            </a>
+                            <button
+                              onClick={() => {
                                 const updated = contents.map((c) =>
-                                  c.id === activeContentDetail.id ? { ...c, driveLink: userLink, status: "Published" as const } : c
+                                  c.id === activeContentDetail.id ? { ...c, driveLink: "" } : c
                                 );
                                 saveContentsToStorage(updated);
-                                setActiveContentDetail({ ...activeContentDetail, driveLink: userLink, status: "Published" });
-                                setStatusMessage("Tautan Google Drive berhasil dihubungkan!");
-                                setTimeout(() => setStatusMessage(""), 2000);
-                              }
-                            }}
-                            className="text-[11px] text-blue-400 hover:underline text-left font-bold"
-                          >
-                            + Tempel Link Google Drive (Manual)
-                          </button>
+                                setActiveContentDetail({ ...activeContentDetail, driveLink: "" });
+                              }}
+                              className="px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-300 border border-red-500/20 text-xs font-semibold rounded-xl transition shrink-0"
+                            >
+                              Hapus
+                            </button>
+                          </>
+                        )}
+                        {!activeContentDetail.driveLink && (
                           <button
                             onClick={() => handleDriveUploadMock(activeContentDetail.id)}
-                            className="text-[10px] text-white/40 hover:text-white/60 text-left italic"
+                            className="px-3 py-1.5 bg-white/5 hover:bg-white/10 text-white/60 text-xs font-semibold rounded-xl transition shrink-0"
                           >
-                            atau Hubungkan File Edit (Simulasi)
+                            Simulasikan
                           </button>
-                        </div>
-                      )}
+                        )}
+                      </div>
                     </div>
                   </div>
 
