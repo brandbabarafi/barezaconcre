@@ -1,5 +1,5 @@
 // prompt-helper.ts
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleGenAI } from "@google/genai";
 
 export const BrandVoiceInstruction = `
 Kamu adalah seorang Crew Outlet Kebab Turki Baba Rafi yang cerdas, pecicilan (sangat aktif, heboh, tidak bisa diam), banyak akal (selalu punya solusi cerdik), ramah kepada pembeli namun memiliki selera humor yang sangat sarkas, sinis secara jenaka, dan suka menyindir realita sosial sehari-hari atau tren medsos terkini. 
@@ -52,23 +52,29 @@ export function fileToBase64(file: File): Promise<string> {
   });
 }
 
-// Client-side call to Gemini 1.5 Flash API
+const GEMINI_MODEL = "gemini-2.5-flash";
+
+// Client-side call to Gemini API
 export async function generateScriptWithGemini(
   apiKey: string,
   topic: string,
   hookKnowledge: string,
   platform: string
 ): Promise<string> {
-  const genAI = new GoogleGenerativeAI(apiKey);
-  const model = genAI.getGenerativeModel({ 
-    model: "gemini-1.5-flash",
-    systemInstruction: buildSystemPrompt(hookKnowledge),
-  });
+  const ai = new GoogleGenAI({ apiKey });
 
   const userPrompt = buildGenerationPrompt(topic, platform);
-  const result = await model.generateContent(userPrompt);
-  
-  const text = result.response.text();
+  const systemPrompt = buildSystemPrompt(hookKnowledge);
+
+  const response = await ai.models.generateContent({
+    model: GEMINI_MODEL,
+    contents: userPrompt,
+    config: {
+      systemInstruction: systemPrompt,
+    },
+  });
+
+  const text = response.text;
   if (!text) throw new Error("Format respons Gemini tidak valid.");
   
   return text;
@@ -82,8 +88,7 @@ export async function transcribeAndAnalyzeWithGemini(
   const base64Data = await fileToBase64(file);
   const mimeType = file.type;
 
-  const genAI = new GoogleGenerativeAI(apiKey);
-  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+  const ai = new GoogleGenAI({ apiKey });
 
   const promptText = `
 Tugas Anda adalah membedah video/audio referensi ini untuk kebutuhan riset konten F&B Kebab Baba Rafi.
@@ -106,16 +111,25 @@ Format keluaran harus jelas dengan pemisah Markdown seperti:
 ...
 `;
 
-  const inlineData = {
-    inlineData: {
-      data: base64Data,
-      mimeType: mimeType,
-    },
-  };
+  const response = await ai.models.generateContent({
+    model: GEMINI_MODEL,
+    contents: [
+      {
+        role: "user",
+        parts: [
+          {
+            inlineData: {
+              data: base64Data,
+              mimeType: mimeType,
+            },
+          },
+          { text: promptText },
+        ],
+      },
+    ],
+  });
 
-  const result = await model.generateContent([inlineData, promptText]);
-  const text = result.response.text();
-
+  const text = response.text;
   if (!text) throw new Error("Format respons analisis video tidak valid.");
 
   let transcription = "Transkrip gagal dimuat.";
@@ -135,8 +149,7 @@ export async function analyzeLinkWithGemini(
   apiKey: string,
   link: string
 ): Promise<{ transcription: string; analysis: string }> {
-  const genAI = new GoogleGenerativeAI(apiKey);
-  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+  const ai = new GoogleGenAI({ apiKey });
   
   const promptText = `
 Tugas Anda adalah menganalisis link video media sosial (TikTok/Instagram) berikut untuk riset konten F&B Kebab Baba Rafi:
@@ -162,8 +175,12 @@ Format keluaran harus jelas dengan pemisah Markdown seperti:
 ...
 `;
 
-  const result = await model.generateContent(promptText);
-  const text = result.response.text();
+  const response = await ai.models.generateContent({
+    model: GEMINI_MODEL,
+    contents: promptText,
+  });
+
+  const text = response.text;
   if (!text) throw new Error("Format respons analisis link tidak valid.");
 
   let transcription = "Transkrip tidak tersedia secara langsung untuk tautan eksternal.";
@@ -183,20 +200,29 @@ export async function extractHookFromPDFWithGemini(
   apiKey: string,
   pdfBase64: string
 ): Promise<string> {
-  const genAI = new GoogleGenerativeAI(apiKey);
-  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+  const ai = new GoogleGenAI({ apiKey });
   
   const promptText = "Ekstrak dan rangkum seluruh aturan, panduan, tips, dan contoh pembuatan hook yang ada di dalam dokumen PDF ini. Buatlah menjadi teks aturan panduan yang rapi, padat, dan terstruktur agar dapat digunakan oleh AI penulis skrip sebagai basis panduan utama.";
 
-  const inlineData = {
-    inlineData: {
-      data: pdfBase64,
-      mimeType: "application/pdf",
-    },
-  };
+  const response = await ai.models.generateContent({
+    model: GEMINI_MODEL,
+    contents: [
+      {
+        role: "user",
+        parts: [
+          {
+            inlineData: {
+              data: pdfBase64,
+              mimeType: "application/pdf",
+            },
+          },
+          { text: promptText },
+        ],
+      },
+    ],
+  });
 
-  const result = await model.generateContent([inlineData, promptText]);
-  const text = result.response.text();
+  const text = response.text;
   if (!text) throw new Error("Format respons ekstraksi PDF tidak valid.");
 
   return text;
@@ -258,10 +284,11 @@ export function getMockLinkAnalysis(link: string): { transcription: string; anal
     analysis: `### Analisis Struktur Skrip (Tautan: ${link})
 - **Hook**: Menampilkan visual makanan dari jarak dekat dalam 2 detik pertama.
 - **Visual Retention**: Ekspresi wajah terkejut saat gigitan pertama.
-- **Key Takeaway**: Konten yang fokus pada visual tekstur makanan lumer terbukti memiliki retensi tinggi.
+- **Climax/Pacing**: Transisi cepat antara visual makanan dan reaksi wajah.
+- **CTA**: Persuasif dengan ajakan langsung.
 
 ### Ide Adaptasi Baba Rafi (Gaya Sarkas Crew)
-- **Konsep**: Membuat tandingan ulasan makanan lebay.
-- **Skrip Adaptasi**: "Hari ini gue mau nunjukin kebab ter-normal di dunia. Gak ada keju yang ditarik sampai satu meter, gak ada emas 24 karat di atasnya. Cuma daging sapi premium melimpah sama saus rahasia yang rasanya konsisten bikin lu gak sedih lagi. Sederhana, kenyang, gak usah banyak gaya."`
+- **Konsep**: Crew outlet yang 'bosen jualan tapi tetap profesional'.
+- **Skrip Adaptasi**: "Gue udah jual kebab 8 jam nonstop hari ini. Muka gue udah kayak orang yang ditolak KPR. Tapi pas lu dateng beli kebab jumbo, senyum gue langsung mekar kayak bunga di iklan pewangi. Makasih udah jadi alasan gue semangat kerja hari ini, cuy."`,
   };
 }
