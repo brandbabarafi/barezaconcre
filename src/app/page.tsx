@@ -233,6 +233,23 @@ export default function Home() {
     }
   };
 
+  // Drag and Drop Handlers
+  const handleDragStart = (e: React.DragEvent, id: string) => {
+    e.dataTransfer.setData("text/plain", id);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+  };
+
+  const handleDrop = (e: React.DragEvent, targetStatus: ContentItem["status"]) => {
+    e.preventDefault();
+    const id = e.dataTransfer.getData("text/plain");
+    if (id) {
+      handleUpdateStatus(id, targetStatus);
+    }
+  };
+
   const handleDeleteContent = (id: string) => {
     if (confirm("Hapus ide konten ini dari pipeline?")) {
       const filtered = contents.filter((c) => c.id !== id);
@@ -403,7 +420,7 @@ export default function Home() {
       <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-10 pb-6 border-b border-white/5">
         <div>
           <h1 className="text-3xl font-black tracking-tight text-white flex items-center gap-2">
-            Barezaconcre
+            Salim Mas Mirza
           </h1>
           <p className="text-white/50 text-sm mt-1">
             Asisten Kreator Kebab Turki Baba Rafi
@@ -546,14 +563,20 @@ export default function Home() {
                   </h3>
                 </div>
                 
-                <div className="space-y-4">
+                <div 
+                  className="space-y-4 min-h-[450px] rounded-xl"
+                  onDragOver={handleDragOver}
+                  onDrop={(e) => handleDrop(e, "Draft")}
+                >
                   {contents
                     .filter((c) => c.status === "Draft" || c.status === "Revision")
                     .map((item) => (
                       <div
                         key={item.id}
+                        draggable
+                        onDragStart={(e) => handleDragStart(e, item.id)}
                         onClick={() => setActiveContentDetail(item)}
-                        className="glass-card p-4 rounded-xl cursor-pointer relative"
+                        className="glass-card p-4 rounded-xl cursor-pointer relative cursor-grab active:cursor-grabbing"
                       >
                         {item.status === "Revision" && (
                           <span className="absolute top-2 right-2 badge-revision text-[10px] px-2 py-0.5 rounded-full uppercase font-bold">
@@ -568,9 +591,15 @@ export default function Home() {
                         
                         <div className="flex justify-between items-center mt-4 pt-3 border-t border-white/5 text-[11px] text-white/40">
                           <span>Publish: {item.publishDate}</span>
-                          <span className="text-white font-medium hover:underline flex items-center gap-1">
-                            Buka Detail &rarr;
-                          </span>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleUpdateStatus(item.id, "Waiting Approval");
+                            }}
+                            className="px-2.5 py-1 bg-yellow-500 hover:bg-yellow-600 text-black text-[10px] font-bold rounded-lg transition"
+                          >
+                            Ajukan Review
+                          </button>
                         </div>
                       </div>
                     ))}
@@ -581,7 +610,7 @@ export default function Home() {
                   )}
                 </div>
               </div>
-
+ 
               {/* Waiting Approval Column */}
               <div>
                 <div className="flex justify-between items-center mb-4 px-1">
@@ -590,15 +619,21 @@ export default function Home() {
                     Waiting Approval ({contents.filter((c) => c.status === "Waiting Approval").length})
                   </h3>
                 </div>
-
-                <div className="space-y-4">
+ 
+                <div 
+                  className="space-y-4 min-h-[450px] rounded-xl"
+                  onDragOver={handleDragOver}
+                  onDrop={(e) => handleDrop(e, "Waiting Approval")}
+                >
                   {contents
                     .filter((c) => c.status === "Waiting Approval")
                     .map((item) => (
                       <div
                         key={item.id}
+                        draggable
+                        onDragStart={(e) => handleDragStart(e, item.id)}
                         onClick={() => setActiveContentDetail(item)}
-                        className="glass-card p-4 rounded-xl cursor-pointer border-yellow-500/20"
+                        className="glass-card p-4 rounded-xl cursor-pointer border-yellow-500/20 cursor-grab active:cursor-grabbing"
                       >
                         <span className="text-xs text-white/40 block mb-1">
                           {item.platform === "Both" ? "TikTok + Reels" : item.platform === "TikTok" ? "TikTok" : "Reels"}
@@ -624,7 +659,7 @@ export default function Home() {
                   )}
                 </div>
               </div>
-
+ 
               {/* Ready to Publish & Live Column */}
               <div>
                 <div className="flex justify-between items-center mb-4 px-1">
@@ -633,15 +668,21 @@ export default function Home() {
                     Approved & Live ({contents.filter((c) => c.status === "Approved" || c.status === "Published").length})
                   </h3>
                 </div>
-
-                <div className="space-y-4">
+ 
+                <div 
+                  className="space-y-4 min-h-[450px] rounded-xl"
+                  onDragOver={handleDragOver}
+                  onDrop={(e) => handleDrop(e, "Approved")}
+                >
                   {contents
                     .filter((c) => c.status === "Approved" || c.status === "Published")
                     .map((item) => (
                       <div
                         key={item.id}
+                        draggable
+                        onDragStart={(e) => handleDragStart(e, item.id)}
                         onClick={() => setActiveContentDetail(item)}
-                        className={`glass-card p-4 rounded-xl cursor-pointer ${item.status === "Published" ? "border-blue-500/20 opacity-80" : "border-emerald-500/20"}`}
+                        className={`glass-card p-4 rounded-xl cursor-pointer cursor-grab active:cursor-grabbing ${item.status === "Published" ? "border-blue-500/20 opacity-80" : "border-emerald-500/20"}`}
                       >
                         <span className="text-xs text-white/40 block mb-1">
                           {item.platform === "Both" ? "TikTok + Reels" : item.platform === "TikTok" ? "TikTok" : "Reels"}
@@ -925,7 +966,7 @@ export default function Home() {
           <div className="glass-container p-6 md:p-8 rounded-2xl">
             <h3 className="text-2xl font-bold mb-2 text-white">Latih AI dengan Dokumen Hook</h3>
             <p className="text-white/50 text-xs mb-6 leading-relaxed">
-              Anda memiliki dokumen pembelajaran Hook yang paling memikat? Salin isi teks dari file PDF tersebut dan tempelkan ke dalam kolom di bawah ini. AI Barezaconcre akan merekam aturan tersebut sebagai basis utama pembuatan hook di semua skrip selanjutnya.
+              Anda memiliki dokumen pembelajaran Hook yang paling memikat? Salin isi teks dari file PDF tersebut dan tempelkan ke dalam kolom di bawah ini. AI Salim Mas Mirza akan merekam aturan tersebut sebagai basis utama pembuatan hook di semua skrip selanjutnya.
             </p>
 
             <form onSubmit={handleSaveSettings} className="space-y-6">

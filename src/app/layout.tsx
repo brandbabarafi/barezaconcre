@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Barezaconcre 🌯",
+  title: "Salim Mas Mirza",
   description: "Sarcastic F&B Content Creator Hub for Kebab Turki Baba Rafi",
 };
 
