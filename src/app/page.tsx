@@ -1307,46 +1307,46 @@ export default function Home() {
             <div className="flex-1 overflow-y-auto p-6 space-y-6">
               {/* If in manager approval simulation view */}
               {isManagerPreview ? (
-                <div className="p-5 bg-white/[0.02] border border-white/10 rounded-2xl space-y-4">
-                  <h4 className="text-sm font-bold text-yellow-400 flex items-center gap-2">
-                    Simulator Approval Manajer
+                <div className="p-5 bg-[var(--bg-card-subtle)] border border-[var(--border)] rounded-2xl space-y-4">
+                  <h4 className="text-sm font-bold flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
+                    🔍 Simulator Approval Manajer
                   </h4>
-                  <p className="text-xs text-white/60 leading-relaxed">
+                  <p className="text-xs leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
                     Halaman ini menyimulasikan halaman publik aman yang Anda bagikan ke Manajer/Owner untuk review skrip tanpa mewajibkan mereka login.
                   </p>
 
-                  <div className="p-4 bg-black/40 rounded-xl text-sm border border-white/5 max-h-[200px] overflow-y-auto">
-                    <span className="text-xs text-white/40 block mb-1">Pratinjau Skrip:</span>
+                  <div className="p-4 bg-white border border-[var(--border)] rounded-xl text-sm max-h-[200px] overflow-y-auto">
+                    <span className="text-[10px] font-semibold uppercase tracking-wider block mb-2" style={{ color: 'var(--text-tertiary)' }}>Pratinjau Skrip:</span>
                     {renderMarkdown(activeContentDetail.script || "*Skrip kosong. Silakan generate skrip terlebih dahulu.*")}
                   </div>
 
                   <div>
-                    <label className="block text-xs text-white/50 mb-1">Catatan Revisi (Diisi jika tidak disetujui)</label>
+                    <label className="block text-xs mb-1 font-medium" style={{ color: 'var(--text-secondary)' }}>Catatan Revisi (Diisi jika tidak disetujui)</label>
                     <textarea
                       rows={2}
                       value={managerComment}
                       onChange={(e) => setManagerComment(e.target.value)}
                       placeholder="Masukkan catatan perbaikan untuk kreator..."
-                      className="w-full p-2.5 bg-black/20 border border-white/10 rounded-xl focus:outline-none focus:border-white/30 text-xs text-white"
+                      className="w-full p-2.5 bg-[var(--bg-card-subtle)] border border-[var(--border)] rounded-xl focus:outline-none focus:border-[#999891] text-xs"
                     />
                   </div>
 
                   <div className="flex gap-2">
                     <button
                       onClick={() => handleManagerAction(true)}
-                      className="flex-1 py-2 bg-emerald-500 hover:bg-emerald-600 text-black font-bold text-xs rounded-xl"
+                      className="flex-1 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl transition"
                     >
-                      Approve & Siap Produksi
+                      Approve &amp; Siap Produksi
                     </button>
                     <button
                       onClick={() => handleManagerAction(false)}
-                      className="flex-1 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/30 text-xs rounded-xl"
+                      className="flex-1 py-2 border font-semibold text-xs rounded-xl transition" style={{ borderColor: 'var(--border)', color: 'var(--text-secondary)', background: 'var(--bg-card-subtle)' }}
                     >
                       Minta Revisi
                     </button>
                     <button
                       onClick={() => setIsManagerPreview(false)}
-                      className="px-4 py-2 bg-zinc-800 text-white text-xs rounded-xl"
+                      className="px-4 py-2 glass-button text-xs rounded-xl"
                     >
                       Batal
                     </button>
@@ -1357,7 +1357,7 @@ export default function Home() {
                   {/* Status, Dates and Links */}
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <div>
-                      <span className="text-[10px] text-white/40 block font-medium uppercase tracking-wider mb-1">Status Konten</span>
+                      <span className="text-[10px] font-semibold uppercase tracking-wider block mb-1.5" style={{ color: 'var(--text-tertiary)' }}>Status Konten</span>
                       <span className={`text-xs px-2.5 py-1 rounded-full font-bold inline-block
                         ${activeContentDetail.status === "Draft" ? "badge-draft" : ""}
                         ${activeContentDetail.status === "Waiting Approval" ? "badge-approval" : ""}
@@ -1370,7 +1370,7 @@ export default function Home() {
                     </div>
 
                     <div>
-                      <span className="text-[10px] text-white/40 block font-medium uppercase tracking-wider mb-1">Jadwal Publish</span>
+                      <span className="text-[10px] font-semibold uppercase tracking-wider block mb-1.5" style={{ color: 'var(--text-tertiary)' }}>Jadwal Publish</span>
                       <input
                         type="date"
                         value={activeContentDetail.publishDate}
@@ -1381,19 +1381,19 @@ export default function Home() {
                           saveContentsToStorage(updated);
                           setActiveContentDetail({ ...activeContentDetail, publishDate: e.target.value });
                         }}
-                        className="bg-transparent text-white border border-white/10 rounded px-2 py-0.5 text-xs focus:outline-none focus:border-white/30"
+                        className="bg-[var(--bg-card-subtle)] border border-[var(--border)] rounded-lg px-2 py-1 text-xs focus:outline-none focus:border-[#999891]" style={{ color: 'var(--text-primary)' }}
                       />
                     </div>
 
                     <div className="col-span-2 space-y-2">
                       <div className="flex justify-between items-center">
-                        <span className="text-[10px] text-white/40 font-medium uppercase tracking-wider">Asset Google Drive</span>
+                        <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--text-tertiary)' }}>Asset Google Drive</span>
                         {driveFolder && (
                           <a
                             href={driveFolder}
                             target="_blank"
                             rel="noreferrer"
-                            className="text-[10px] text-blue-400 hover:underline flex items-center gap-1 font-bold"
+                            className="text-[10px] font-bold hover:underline flex items-center gap-1" style={{ color: 'var(--text-secondary)' }}
                           >
                             📂 Buka Folder Drive Utama
                           </a>
@@ -1413,7 +1413,7 @@ export default function Home() {
                             saveContentsToStorage(updated);
                             setActiveContentDetail({ ...activeContentDetail, driveLink: link });
                           }}
-                          className="flex-1 px-3 py-1.5 bg-black/35 border border-white/10 rounded-xl focus:outline-none focus:border-white/30 text-xs text-white"
+                          className="flex-1 px-3 py-1.5 bg-[var(--bg-card-subtle)] border border-[var(--border)] rounded-xl focus:outline-none focus:border-[#999891] text-xs"
                         />
                         {activeContentDetail.driveLink && (
                           <>
@@ -1421,7 +1421,7 @@ export default function Home() {
                               href={activeContentDetail.driveLink}
                               target="_blank"
                               rel="noreferrer"
-                              className="px-3 py-1.5 bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 border border-blue-500/30 text-xs font-semibold rounded-xl transition shrink-0"
+                              className="px-3 py-1.5 bg-[var(--text-primary)] hover:opacity-90 text-white border-0 text-xs font-semibold rounded-xl transition shrink-0"
                             >
                               Buka
                             </a>
@@ -1433,7 +1433,7 @@ export default function Home() {
                                 saveContentsToStorage(updated);
                                 setActiveContentDetail({ ...activeContentDetail, driveLink: "" });
                               }}
-                              className="px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-300 border border-red-500/20 text-xs font-semibold rounded-xl transition shrink-0"
+                              className="px-3 py-1.5 border border-[var(--border)] text-xs font-semibold rounded-xl transition shrink-0 glass-button"
                             >
                               Hapus
                             </button>
@@ -1442,7 +1442,7 @@ export default function Home() {
                         {!activeContentDetail.driveLink && (
                           <button
                             onClick={() => handleDriveUploadMock(activeContentDetail.id)}
-                            className="px-3 py-1.5 bg-white/5 hover:bg-white/10 text-white/60 text-xs font-semibold rounded-xl transition shrink-0"
+                            className="px-3 py-1.5 glass-button text-xs font-semibold rounded-xl transition shrink-0"
                           >
                             Simulasikan
                           </button>
@@ -1453,11 +1453,11 @@ export default function Home() {
 
                   {/* Revision Notes Alert */}
                   {activeContentDetail.status === "Revision" && activeContentDetail.revisionNotes && (
-                    <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl">
-                      <h4 className="text-xs font-bold text-red-400 mb-1 flex items-center gap-1">
-                        Catatan Revisi dari Manajer:
+                    <div className="p-4 bg-orange-50 border border-orange-200 rounded-xl">
+                      <h4 className="text-xs font-bold text-orange-700 mb-1 flex items-center gap-1">
+                        ⚠️ Catatan Revisi dari Manajer:
                       </h4>
-                      <p className="text-xs text-white/80 leading-relaxed italic">
+                      <p className="text-xs text-orange-800 leading-relaxed italic">
                         &quot;{activeContentDetail.revisionNotes}&quot;
                       </p>
                     </div>
@@ -1466,8 +1466,8 @@ export default function Home() {
                   {/* Premis / Idea */}
                   {activeContentDetail.idea && (
                     <div>
-                      <h4 className="text-xs font-bold uppercase tracking-widest text-white/40 mb-1.5">Konsep Dasar</h4>
-                      <p className="text-sm text-white/80 pl-3 border-l-2 border-white/10 italic">
+                      <h4 className="text-xs font-bold uppercase tracking-widest mb-1.5" style={{ color: 'var(--text-tertiary)' }}>Konsep Dasar</h4>
+                      <p className="text-sm pl-3 border-l-2 border-[var(--border)] italic" style={{ color: 'var(--text-secondary)' }}>
                         {activeContentDetail.idea}
                       </p>
                     </div>
@@ -1475,7 +1475,7 @@ export default function Home() {
 
                   {/* Script body */}
                   <div>
-                    <h4 className="text-xs font-bold uppercase tracking-widest text-white/40 mb-2.5 flex justify-between items-center">
+                    <h4 className="text-xs font-bold uppercase tracking-widest mb-2.5 flex justify-between items-center" style={{ color: 'var(--text-tertiary)' }}>
                       <span>📜 Skrip Video</span>
                       <button
                         onClick={() => {
@@ -1484,7 +1484,7 @@ export default function Home() {
                           setActiveTab("script-writer");
                           setActiveContentDetail(null);
                         }}
-                        className="text-[10px] text-white/50 hover:text-white underline lowercase"
+                        className="text-[10px] underline lowercase font-medium" style={{ color: 'var(--text-secondary)' }}
                       >
                         {activeContentDetail.script ? "Buat ulang dengan AI" : "Generate skrip sekarang"}
                       </button>
@@ -1496,15 +1496,15 @@ export default function Home() {
                           rows={10}
                           value={activeContentDetail.script}
                           onChange={(e) => handleUpdateScriptBody(activeContentDetail.id, e.target.value)}
-                          className="w-full p-3 bg-black/30 border border-white/10 rounded-xl focus:outline-none focus:border-white/20 font-mono text-xs text-white/90 leading-relaxed resize-y"
+                          className="w-full p-4 bg-[var(--bg-card-subtle)] border border-[var(--border)] rounded-xl focus:outline-none focus:border-[#999891] font-mono text-xs leading-relaxed resize-y"
                         />
-                        <div className="p-4 bg-black/10 rounded-xl border border-white/5 max-h-[300px] overflow-y-auto">
-                          <span className="text-[10px] text-white/40 block mb-2">Pratinjau Tampilan Skrip:</span>
+                        <div className="p-4 bg-white border border-[var(--border)] rounded-xl max-h-[300px] overflow-y-auto">
+                          <span className="text-[10px] font-semibold uppercase tracking-wider block mb-2" style={{ color: 'var(--text-tertiary)' }}>Pratinjau Tampilan Skrip:</span>
                           {renderMarkdown(activeContentDetail.script)}
                         </div>
                       </div>
                     ) : (
-                      <div className="py-8 rounded-xl border border-dashed border-white/10 text-center text-white/30 text-xs">
+                      <div className="py-8 rounded-xl border-2 border-dashed border-[var(--border)] text-center text-xs" style={{ color: 'var(--text-tertiary)' }}>
                         Belum ada skrip untuk ide ini.
                       </div>
                     )}
@@ -1515,10 +1515,10 @@ export default function Home() {
 
             {/* Footer Modal */}
             {!isManagerPreview && (
-              <div className="p-5 border-t border-white/10 flex justify-between bg-black/20">
+              <div className="p-5 border-t border-[var(--border)] flex justify-between" style={{ background: 'var(--bg-card-subtle)' }}>
                 <button
                   onClick={() => handleDeleteContent(activeContentDetail.id)}
-                  className="px-4 py-2 text-xs font-semibold text-red-400 hover:bg-red-500/10 rounded-xl transition"
+                  className="px-4 py-2 text-xs font-semibold rounded-xl transition" style={{ color: 'var(--text-tertiary)' }}
                 >
                   Hapus Ide
                 </button>
@@ -1528,9 +1528,9 @@ export default function Home() {
                     <button
                       onClick={() => {
                         handleUpdateStatus(activeContentDetail.id, "Waiting Approval");
-                        setIsManagerPreview(true); // Auto open simulator
+                        setIsManagerPreview(true);
                       }}
-                      className="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-black font-bold text-xs rounded-xl"
+                      className="px-4 py-2 glass-button-primary font-bold text-xs rounded-xl"
                     >
                       Bagikan Approval Link (Simulasi)
                     </button>
@@ -1538,7 +1538,7 @@ export default function Home() {
                   {activeContentDetail.status === "Approved" && (
                     <button
                       onClick={() => handleUpdateStatus(activeContentDetail.id, "Published")}
-                      className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white font-bold text-xs rounded-xl"
+                      className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl transition"
                     >
                       Set Status Live (Publish)
                     </button>
