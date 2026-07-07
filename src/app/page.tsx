@@ -46,6 +46,7 @@ export default function Home() {
   const [apiKey, setApiKey] = useState("");
   const [driveFolder, setDriveFolder] = useState("");
   const [hookKnowledge, setHookKnowledge] = useState("");
+  const [sheetsApiUrl, setSheetsApiUrl] = useState("");
 
   // Data States
   const [contents, setContents] = useState<ContentItem[]>([]);
@@ -54,6 +55,7 @@ export default function Home() {
   // UI Flow States
   const [isClient, setIsClient] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
   const [statusMessage, setStatusMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -89,10 +91,15 @@ export default function Home() {
     setDriveFolder(localStorage.getItem("bz_gdrive_folder") || "");
     setHookKnowledge(localStorage.getItem("bz_hook_knowledge") || "");
     
+    const savedSheetsUrl = localStorage.getItem("bz_sheets_url") || "";
+    setSheetsApiUrl(savedSheetsUrl);
+    
     // Load data from LocalStorage
     const savedContents = localStorage.getItem("bz_contents");
+    let initialContents: ContentItem[] = [];
     if (savedContents) {
-      setContents(JSON.parse(savedContents));
+      initialContents = JSON.parse(savedContents);
+      setContents(initialContents);
     } else {
       // Set dummy/demo content if empty
       const demoContents: ContentItem[] = [
@@ -117,26 +124,77 @@ export default function Home() {
           createdAt: new Date().toISOString()
         }
       ];
-      setContents(demoContents);
-      localStorage.setItem("bz_contents", JSON.stringify(demoContents));
+      initialContents = demoContents;
+      setContents(initialContents);
+      localStorage.setItem("bz_contents", JSON.stringify(initialContents));
     }
 
     const savedResearches = localStorage.getItem("bz_researches");
     if (savedResearches) {
       setResearches(JSON.parse(savedResearches));
     }
+
+    // Load from Cloud if configured
+    if (savedSheetsUrl) {
+      setIsSyncing(true);
+      fetch(savedSheetsUrl)
+        .then(res => res.json())
+        .then(data => {
+          let hasChanges = false;
+          if (data["bz_contents"]) {
+            const cloudContents = JSON.parse(data["bz_contents"]);
+            setContents(cloudContents);
+            localStorage.setItem("bz_contents", JSON.stringify(cloudContents));
+            hasChanges = true;
+          }
+          if (data["bz_researches"]) {
+            const cloudResearches = JSON.parse(data["bz_researches"]);
+            setResearches(cloudResearches);
+            localStorage.setItem("bz_researches", JSON.stringify(cloudResearches));
+            hasChanges = true;
+          }
+          if (hasChanges) {
+             setStatusMessage("Data berhasil disinkronkan dari Cloud!");
+             setTimeout(() => setStatusMessage(""), 3000);
+          }
+        })
+        .catch(err => {
+          console.error("Gagal menarik data cloud", err);
+          setErrorMessage("Gagal menyinkronkan data dari Google Sheets.");
+          setTimeout(() => setErrorMessage(""), 3000);
+        })
+        .finally(() => setIsSyncing(false));
+    }
   }, []);
+
+  // Cloud Sync Helper
+  const syncToCloud = (key: string, dataStr: string) => {
+    if (!sheetsApiUrl) return;
+    setIsSyncing(true);
+    fetch(sheetsApiUrl, {
+      method: "POST",
+      body: JSON.stringify({ key, data: dataStr }),
+      headers: { "Content-Type": "text/plain;charset=utf-8" } // Plain text to avoid CORS preflight in some Apps Script setups
+    })
+    .then(res => res.json())
+    .catch(err => console.error("Error syncing to Cloud:", err))
+    .finally(() => setIsSyncing(false));
+  };
 
   // Save Contents Helper
   const saveContentsToStorage = (updatedList: ContentItem[]) => {
     setContents(updatedList);
-    localStorage.setItem("bz_contents", JSON.stringify(updatedList));
+    const dataStr = JSON.stringify(updatedList);
+    localStorage.setItem("bz_contents", dataStr);
+    syncToCloud("bz_contents", dataStr);
   };
 
   // Save Researches Helper
   const saveResearchesToStorage = (updatedList: ResearchItem[]) => {
     setResearches(updatedList);
-    localStorage.setItem("bz_researches", JSON.stringify(updatedList));
+    const dataStr = JSON.stringify(updatedList);
+    localStorage.setItem("bz_researches", dataStr);
+    syncToCloud("bz_researches", dataStr);
   };
 
   // Settings Save Handler
@@ -145,8 +203,9 @@ export default function Home() {
     localStorage.setItem("bz_gemini_key", apiKey);
     localStorage.setItem("bz_gdrive_folder", driveFolder);
     localStorage.setItem("bz_hook_knowledge", hookKnowledge);
+    localStorage.setItem("bz_sheets_url", sheetsApiUrl);
     
-    setStatusMessage("Pengaturan berhasil disimpan secara lokal!");
+    setStatusMessage("Pengaturan berhasil disimpan!");
     setTimeout(() => setStatusMessage(""), 3000);
   };
 
@@ -578,8 +637,16 @@ export default function Home() {
       <div className="main-content">
         {/* Top Bar */}
         <header className="topbar">
-          <div>
+          <div className="flex items-center gap-4">
             <div className="topbar-greeting">{greeting}, Creator!</div>
+            {isSyncing && (
+              <span className="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-bold animate-pulse flex items-center gap-1">
+                <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-bounce"></span>
+                Syncing...
+              </span>
+            )}
+          </div>
+          <div>
             <div className="topbar-meta">
               {navItems.find(n => n.id === activeTab)?.label ?? "Dashboard"}
             </div>
@@ -1248,6 +1315,20 @@ export default function Home() {
                 />
                 <span className="text-[10px] block mt-1.5 leading-relaxed" style={{ color: 'var(--text-tertiary)' }}>
                   Dapatkan API Key gratis di Google AI Studio (15 RPM gratis). Jika dikosongkan, web akan otomatis menggunakan simulator/mock-offline agar Anda tetap bisa beraktivitas.
+                </span>
+              </div>
+
+              <div>
+                <label className="block text-xs mb-2 font-medium" style={{ color: 'var(--text-secondary)' }}>Google Sheets Web App URL (Cloud Sync)</label>
+                <input
+                  type="url"
+                  placeholder="https://script.google.com/macros/s/..."
+                  value={sheetsApiUrl}
+                  onChange={(e) => setSheetsApiUrl(e.target.value)}
+                  className="w-full px-3 py-2.5 bg-[var(--bg-card-subtle)] border border-[var(--border)] rounded-xl focus:outline-none focus:border-[#999891] text-sm"
+                />
+                <span className="text-[10px] block mt-1.5 leading-relaxed" style={{ color: 'var(--text-tertiary)' }}>
+                  Gunakan Web App URL dari Google Apps Script untuk menyimpan dan sinkronisasi data ke Google Sheets secara real-time. Jika kosong, data hanya tersimpan secara lokal.
                 </span>
               </div>
 
