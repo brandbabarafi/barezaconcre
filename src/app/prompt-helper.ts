@@ -84,7 +84,7 @@ export async function generateScriptWithGemini(
 }
 
 // Convert file to Base64 helper
-function fileToBase64(file: File): Promise<string> {
+export function fileToBase64(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.readAsDataURL(file);
@@ -225,4 +225,135 @@ export function getMockTranscription(fileName: string): {
 - **Konsep**: Kebalikan dari video asli yang 'teraneh', kita buat 'Kebab Ter-normal'.
 - **Skrip Adaptasi**: "Hari ini gue mau nunjukin kebab ter-normal di dunia. Gak ada keju yang ditarik sampai satu meter, gak ada emas 24 karat di atasnya. Cuma daging sapi premium melimpah sama saus rahasia yang rasanya konsisten bikin lu gak sedih lagi. Sederhana, kenyang, gak usah banyak gaya."`,
   };
+}
+
+// Social Media Link Analysis
+export async function analyzeLinkWithGemini(
+  apiKey: string,
+  link: string
+): Promise<{ transcription: string; analysis: string }> {
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+  const promptText = `
+Tugas Anda adalah menganalisis link video media sosial (TikTok/Instagram) berikut untuk riset konten F&B Kebab Baba Rafi:
+Link Video: ${link}
+
+Karena Anda tidak dapat memutar video secara langsung, buatlah analisis hipotesis atau berikan saran struktur berdasarkan tren konten:
+1. Tulis perkiraan transkrip atau jalan cerita percakapan berdasarkan tipe video tersebut (jika memungkinkan) atau asumsi kreatif yang logis.
+2. Lakukan analisis struktur skrip:
+   - Apa Hook yang dipakai? Mengapa ini bekerja?
+   - Bagaimana pacing/alur pembahasannya?
+   - Apa pelajaran penting (Key Takeaway) dari video tersebut?
+3. Berikan 1 ide modifikasi / konsep adaptasi konten untuk Kebab Turki Baba Rafi dengan gaya Crew Outlet kita yang pecicilan & sarkas.
+
+Format keluaran harus jelas dengan pemisah Markdown seperti:
+# Transkrip Video
+...
+
+# Analisis Struktur
+- **Hook**: ...
+- **Pacing**: ...
+
+# Ide Adaptasi Baba Rafi
+...
+`;
+
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      contents: [
+        {
+          parts: [{ text: promptText }]
+        }
+      ],
+      generationConfig: {
+        temperature: 0.5,
+        maxOutputTokens: 2048,
+      }
+    }),
+  });
+
+  if (!response.ok) {
+    const err = await response.json();
+    throw new Error(err.error?.message || "Gagal menganalisis link dengan Gemini");
+  }
+
+  const data = await response.json();
+  const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+  if (!text) throw new Error("Format respons analisis link tidak valid.");
+
+  let transcription = "Transkrip tidak tersedia secara langsung untuk tautan eksternal.";
+  let analysis = text;
+
+  if (text.includes("# Transkrip Video")) {
+    const parts = text.split(/# Analisis Struktur|# Ide Adaptasi Baba Rafi/);
+    transcription = parts[0].replace("# Transkrip Video", "").trim();
+    analysis = text.replace(parts[0], "").trim();
+  }
+
+  return { transcription, analysis };
+}
+
+export function getMockLinkAnalysis(link: string): { transcription: string; analysis: string } {
+  return {
+    transcription: `[Transkrip Tautan Eksternal: ${link}]\nVideo ini diasumsikan sebagai video ulasan makanan viral di mana pembuat konten membahas keunikan rasa dan antrian panjang pembeli.`,
+    analysis: `### Analisis Struktur Skrip (Tautan: ${link})
+- **Hook**: Menampilkan visual makanan dari jarak dekat dalam 2 detik pertama.
+- **Visual Retention**: Ekspresi wajah terkejut saat gigitan pertama.
+- **Key Takeaway**: Konten yang fokus pada visual tekstur makanan lumer terbukti memiliki retensi tinggi.
+
+### Ide Adaptasi Baba Rafi (Gaya Sarkas Crew)
+- **Konsep**: Membuat tandingan ulasan makanan lebay.
+- **Skrip Adaptasi**: "Hari ini gue mau nunjukin kebab ter-normal di dunia. Gak ada keju yang ditarik sampai satu meter, gak ada emas 24 karat di atasnya. Cuma daging sapi premium melimpah sama saus rahasia yang rasanya konsisten bikin lu gak sedih lagi. Sederhana, kenyang, gak usah banyak gaya."`
+  };
+}
+
+// PDF Hook Guidelines Extractor
+export async function extractHookFromPDFWithGemini(
+  apiKey: string,
+  pdfBase64: string
+): Promise<string> {
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+  const promptText = "Ekstrak dan rangkum seluruh aturan, panduan, tips, dan contoh pembuatan hook yang ada di dalam dokumen PDF ini. Buatlah menjadi teks aturan panduan yang rapi, padat, dan terstruktur agar dapat digunakan oleh AI penulis skrip sebagai basis panduan utama.";
+
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      contents: [
+        {
+          parts: [
+            {
+              inlineData: {
+                mimeType: "application/pdf",
+                data: pdfBase64
+              }
+            },
+            {
+              text: promptText
+            }
+          ]
+        }
+      ],
+      generationConfig: {
+        temperature: 0.3,
+        maxOutputTokens: 2048,
+      }
+    }),
+  });
+
+  if (!response.ok) {
+    const err = await response.json();
+    throw new Error(err.error?.message || "Gagal memproses file PDF dengan Gemini");
+  }
+
+  const data = await response.json();
+  const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+  if (!text) throw new Error("Format respons ekstraksi PDF tidak valid.");
+
+  return text;
 }

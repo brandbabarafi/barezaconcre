@@ -6,7 +6,11 @@ import {
   generateScriptWithGemini,
   transcribeAndAnalyzeWithGemini,
   getMockScript,
-  getMockTranscription
+  getMockTranscription,
+  analyzeLinkWithGemini,
+  getMockLinkAnalysis,
+  extractHookFromPDFWithGemini,
+  fileToBase64
 } from "./prompt-helper";
 
 // Interface Definitions
@@ -66,7 +70,11 @@ export default function Home() {
 
   // FYP Analyzer States
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [videoLink, setVideoLink] = useState("");
   const [fypOutput, setFypOutput] = useState<{ transcription: string; analysis: string } | null>(null);
+
+  // Hook Trainer States
+  const [hookPDFFile, setHookPDFFile] = useState<File | null>(null);
 
   // Modal / Detail State for Dashboard
   const [activeContentDetail, setActiveContentDetail] = useState<ContentItem | null>(null);
@@ -250,6 +258,62 @@ export default function Home() {
     }
   };
 
+  const handleRequestRevision = (e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
+    const notes = prompt("Masukkan catatan revisi untuk kreator:");
+    if (notes !== null) {
+      const updated = contents.map((c) =>
+        c.id === id ? { ...c, status: "Revision" as const, revisionNotes: notes } : c
+      );
+      saveContentsToStorage(updated);
+      setStatusMessage("Status diubah ke Revisi.");
+      setTimeout(() => setStatusMessage(""), 2000);
+      if (activeContentDetail && activeContentDetail.id === id) {
+        setActiveContentDetail({ ...activeContentDetail, status: "Revision", revisionNotes: notes });
+      }
+    }
+  };
+
+  const handleHookPDFUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setHookPDFFile(e.target.files[0]);
+    }
+  };
+
+  const handleExtractHookPDF = async () => {
+    if (!hookPDFFile) return;
+
+    setLoading(true);
+    setErrorMessage("");
+    setStatusMessage(`Membaca dan mengekstrak panduan dari ${hookPDFFile.name}...`);
+
+    try {
+      let extractedGuidelines = "";
+      if (apiKey.trim()) {
+        const base64 = await fileToBase64(hookPDFFile);
+        extractedGuidelines = await extractHookFromPDFWithGemini(apiKey, base64);
+      } else {
+        setStatusMessage("Menjalankan simulasi ekstraksi PDF (Offline Mode)...");
+        await new Promise((r) => setTimeout(r, 2000));
+        extractedGuidelines = `1. **Curiosity Gap di 3 Detik Pertama** (Pancing penonton dengan pertanyaan retoris atau fakta mengejutkan, misal: "Ini rahasia kenapa kebab dingin rasanya tetep gurih...").
+2. **Visual Hooking** (Gunakan transisi gerakan dinamis, potong daging kebab secara cepat, dekatkan kamera ke bahan segar).
+3. **Sarkasme & Komedi Tipis** (Selipkan humor ironis yang menyindir kebiasaan pembeli sehari-hari, misal: "Kebab porsi diet tapi isinya daging doang").
+4. **Call to Action yang Cepat** (Jangan bertele-tele di akhir video, langsung suruh beli ke outlet).`;
+      }
+
+      setHookKnowledge(extractedGuidelines);
+      localStorage.setItem("bz_hook_knowledge", extractedGuidelines);
+      setStatusMessage("Panduan berhasil diekstrak dan disimpan!");
+      setTimeout(() => setStatusMessage(""), 2000);
+      setHookPDFFile(null);
+    } catch (err: unknown) {
+      setErrorMessage(err instanceof Error ? err.message : "Gagal mengekstrak PDF.");
+      setStatusMessage("");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleDeleteContent = (id: string) => {
     if (confirm("Hapus ide konten ini dari pipeline?")) {
       const filtered = contents.filter((c) => c.id !== id);
@@ -282,23 +346,33 @@ export default function Home() {
 
   // Video Analyzer (Transcription & Breakdown) Handler
   const handleAnalyzeVideo = async () => {
-    if (!selectedFile) {
-      setErrorMessage("Silakan pilih file video atau audio terlebih dahulu!");
+    if (!selectedFile && !videoLink.trim()) {
+      setErrorMessage("Silakan pilih file video atau masukkan tautan terlebih dahulu!");
       return;
     }
 
     setLoading(true);
     setErrorMessage("");
-    setStatusMessage(`Sedang mengunggah dan menganalisis ${selectedFile.name}...`);
+    setStatusMessage(selectedFile ? `Sedang menganalisis ${selectedFile.name}...` : `Menganalisis tautan: ${videoLink}...`);
 
     try {
       let analysisResult;
-      if (apiKey.trim()) {
-        analysisResult = await transcribeAndAnalyzeWithGemini(apiKey, selectedFile);
+      if (selectedFile) {
+        if (apiKey.trim()) {
+          analysisResult = await transcribeAndAnalyzeWithGemini(apiKey, selectedFile);
+        } else {
+          setStatusMessage("Menjalankan analisis simulasi (Offline Mode)...");
+          await new Promise((r) => setTimeout(r, 2000));
+          analysisResult = getMockTranscription(selectedFile.name);
+        }
       } else {
-        setStatusMessage("Menjalankan analisis simulasi (Offline Mode)...");
-        await new Promise((r) => setTimeout(r, 2000));
-        analysisResult = getMockTranscription(selectedFile.name);
+        if (apiKey.trim()) {
+          analysisResult = await analyzeLinkWithGemini(apiKey, videoLink);
+        } else {
+          setStatusMessage("Menjalankan analisis simulasi (Offline Mode)...");
+          await new Promise((r) => setTimeout(r, 2000));
+          analysisResult = getMockLinkAnalysis(videoLink);
+        }
       }
 
       setFypOutput(analysisResult);
@@ -308,15 +382,16 @@ export default function Home() {
       // Save to Research database
       const newResearchItem: ResearchItem = {
         id: "res-" + Math.random().toString(36).substring(2, 9),
-        fileName: selectedFile.name,
+        fileName: selectedFile ? selectedFile.name : `Tautan: ${videoLink.replace(/https?:\/\/(www\.)?/, "").substring(0, 30)}...`,
         transcription: analysisResult.transcription,
         analysis: analysisResult.analysis,
         createdAt: new Date().toISOString()
       };
       saveResearchesToStorage([newResearchItem, ...researches]);
-
+      setVideoLink("");
+      setSelectedFile(null);
     } catch (err: unknown) {
-      setErrorMessage(err instanceof Error ? err.message : "Gagal melakukan analisis video.");
+      setErrorMessage(err instanceof Error ? err.message : "Gagal melakukan analisis.");
       setStatusMessage("");
     } finally {
       setLoading(false);
@@ -464,7 +539,7 @@ export default function Home() {
           onClick={() => setActiveTab("dashboard")}
           className={`px-5 py-2.5 font-medium text-sm glass-tab ${activeTab === "dashboard" ? "active" : ""}`}
         >
-          Pipeline Konten
+          Konten Kreasi
         </button>
         <button
           onClick={() => setActiveTab("script-writer")}
@@ -498,7 +573,7 @@ export default function Home() {
           {/* Quick Input Bar (Left/Top) */}
           <div className="lg:col-span-1">
             <div className="glass-container p-6 rounded-2xl sticky top-6">
-              <h3 className="text-lg font-bold mb-4 text-white">Tambah Ide Cepat</h3>
+              <h3 className="text-lg font-bold mb-4 text-white">Tambah Ide</h3>
               <form onSubmit={handleQuickAddContent} className="space-y-4">
                 <div>
                   <label className="block text-xs text-white/50 mb-1.5 font-medium">Judul Konten</label>
@@ -537,7 +612,7 @@ export default function Home() {
                   type="submit"
                   className="w-full py-2.5 glass-button-primary text-sm rounded-xl"
                 >
-                  + Tambahkan ke Draft
+                  + Tambahkan
                 </button>
               </form>
 
@@ -575,8 +650,7 @@ export default function Home() {
                         key={item.id}
                         draggable
                         onDragStart={(e) => handleDragStart(e, item.id)}
-                        onClick={() => setActiveContentDetail(item)}
-                        className="glass-card p-4 rounded-xl cursor-pointer relative cursor-grab active:cursor-grabbing"
+                        className="glass-card p-4 rounded-xl relative cursor-grab active:cursor-grabbing"
                       >
                         {item.status === "Revision" && (
                           <span className="absolute top-2 right-2 badge-revision text-[10px] px-2 py-0.5 rounded-full uppercase font-bold">
@@ -591,15 +665,23 @@ export default function Home() {
                         
                         <div className="flex justify-between items-center mt-4 pt-3 border-t border-white/5 text-[11px] text-white/40">
                           <span>Publish: {item.publishDate}</span>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleUpdateStatus(item.id, "Waiting Approval");
-                            }}
-                            className="px-2.5 py-1 bg-yellow-500 hover:bg-yellow-600 text-black text-[10px] font-bold rounded-lg transition"
-                          >
-                            Ajukan Review
-                          </button>
+                          <div className="flex gap-2 items-center">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleUpdateStatus(item.id, "Waiting Approval");
+                              }}
+                              className="px-2 py-1 bg-yellow-500 hover:bg-yellow-600 text-black text-[10px] font-bold rounded-lg transition"
+                            >
+                              Ajukan Review
+                            </button>
+                            <span 
+                              onClick={() => setActiveContentDetail(item)} 
+                              className="text-white font-medium hover:underline inline-flex items-center gap-1 cursor-pointer"
+                            >
+                              Detail &rarr;
+                            </span>
+                          </div>
                         </div>
                       </div>
                     ))}
@@ -632,8 +714,7 @@ export default function Home() {
                         key={item.id}
                         draggable
                         onDragStart={(e) => handleDragStart(e, item.id)}
-                        onClick={() => setActiveContentDetail(item)}
-                        className="glass-card p-4 rounded-xl cursor-pointer border-yellow-500/20 cursor-grab active:cursor-grabbing"
+                        className="glass-card p-4 rounded-xl border-yellow-500/20 relative cursor-grab active:cursor-grabbing"
                       >
                         <span className="text-xs text-white/40 block mb-1">
                           {item.platform === "Both" ? "TikTok + Reels" : item.platform === "TikTok" ? "TikTok" : "Reels"}
@@ -646,9 +727,29 @@ export default function Home() {
                         </div>
                         <div className="flex justify-between items-center mt-4 pt-3 border-t border-white/5 text-[11px] text-white/40">
                           <span>Publish: {item.publishDate}</span>
-                          <span className="text-white font-medium hover:underline flex items-center gap-1">
-                            Buka Detail &rarr;
-                          </span>
+                          <div className="flex gap-2 items-center">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleUpdateStatus(item.id, "Approved");
+                              }}
+                              className="px-2 py-1 bg-emerald-500 hover:bg-emerald-600 text-black text-[10px] font-bold rounded-lg transition"
+                            >
+                              Setujui
+                            </button>
+                            <button
+                              onClick={(e) => handleRequestRevision(e, item.id)}
+                              className="px-2 py-1 bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/30 text-[10px] font-bold rounded-lg transition"
+                            >
+                              Revisi
+                            </button>
+                            <span 
+                              onClick={() => setActiveContentDetail(item)} 
+                              className="text-white font-medium hover:underline inline-flex items-center gap-1 cursor-pointer"
+                            >
+                              Detail &rarr;
+                            </span>
+                          </div>
                         </div>
                       </div>
                     ))}
@@ -681,8 +782,7 @@ export default function Home() {
                         key={item.id}
                         draggable
                         onDragStart={(e) => handleDragStart(e, item.id)}
-                        onClick={() => setActiveContentDetail(item)}
-                        className={`glass-card p-4 rounded-xl cursor-pointer cursor-grab active:cursor-grabbing ${item.status === "Published" ? "border-blue-500/20 opacity-80" : "border-emerald-500/20"}`}
+                        className={`glass-card p-4 rounded-xl relative cursor-grab active:cursor-grabbing ${item.status === "Published" ? "border-blue-500/20 opacity-80" : "border-emerald-500/20"}`}
                       >
                         <span className="text-xs text-white/40 block mb-1">
                           {item.platform === "Both" ? "TikTok + Reels" : item.platform === "TikTok" ? "TikTok" : "Reels"}
@@ -701,9 +801,25 @@ export default function Home() {
                         </div>
                         <div className="flex justify-between items-center mt-4 pt-3 border-t border-white/5 text-[11px] text-white/40">
                           <span>Publish: {item.publishDate}</span>
-                          <span className="text-white font-medium hover:underline flex items-center gap-1">
-                            Buka Detail &rarr;
-                          </span>
+                          <div className="flex gap-2 items-center">
+                            {item.status === "Approved" && (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleUpdateStatus(item.id, "Published");
+                                }}
+                                className="px-2 py-1 bg-blue-500 hover:bg-blue-600 text-white text-[10px] font-bold rounded-lg transition"
+                              >
+                                Publish (Live)
+                              </button>
+                            )}
+                            <span 
+                              onClick={() => setActiveContentDetail(item)} 
+                              className="text-white font-medium hover:underline inline-flex items-center gap-1 cursor-pointer"
+                            >
+                              Detail &rarr;
+                            </span>
+                          </div>
                         </div>
                       </div>
                     ))}
@@ -863,6 +979,7 @@ export default function Home() {
                     onChange={(e) => {
                       if (e.target.files && e.target.files[0]) {
                         setSelectedFile(e.target.files[0]);
+                        setVideoLink("");
                       }
                     }}
                     className="hidden"
@@ -881,9 +998,30 @@ export default function Home() {
                   </label>
                 </div>
 
+                {/* OR divider */}
+                <div className="flex items-center my-3 text-xs text-white/30">
+                  <div className="flex-1 h-px bg-white/10" />
+                  <span className="px-2">ATAU MASUKKAN LINK</span>
+                  <div className="flex-1 h-px bg-white/10" />
+                </div>
+
+                {/* URL Input */}
+                <div>
+                  <input
+                    type="url"
+                    placeholder="Masukkan Tautan TikTok atau IG Reels..."
+                    value={videoLink}
+                    onChange={(e) => {
+                      setVideoLink(e.target.value);
+                      if (e.target.value.trim()) setSelectedFile(null);
+                    }}
+                    className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:border-white/30 text-xs text-white"
+                  />
+                </div>
+
                 <button
                   type="button"
-                  disabled={loading || !selectedFile}
+                  disabled={loading || (!selectedFile && !videoLink.trim())}
                   onClick={handleAnalyzeVideo}
                   className="w-full py-3 glass-button-primary text-sm rounded-xl font-bold flex items-center justify-center gap-2 disabled:opacity-50"
                 >
@@ -970,6 +1108,46 @@ export default function Home() {
             </p>
 
             <form onSubmit={handleSaveSettings} className="space-y-6">
+              {/* PDF Uploader */}
+              <div className="mb-6 p-4 rounded-xl border border-dashed border-white/10 bg-white/[0.01]">
+                <label className="block text-xs text-white/50 mb-2 font-medium">Unggah Berkas PDF Panduan Hook</label>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="file"
+                    accept="application/pdf"
+                    onChange={handleHookPDFUpload}
+                    className="hidden"
+                    id="hook-pdf-upload"
+                  />
+                  <label
+                    htmlFor="hook-pdf-upload"
+                    className="px-4 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-xs text-white cursor-pointer font-medium transition"
+                  >
+                    Pilih File PDF
+                  </label>
+                  <span className="text-xs text-white/40">
+                    {hookPDFFile ? hookPDFFile.name : "Format PDF (Maks. 10MB)"}
+                  </span>
+                  {hookPDFFile && (
+                    <button
+                      type="button"
+                      disabled={loading}
+                      onClick={handleExtractHookPDF}
+                      className="px-4 py-2.5 glass-button-primary text-xs rounded-xl font-bold flex items-center gap-1.5 ml-auto"
+                    >
+                      {loading ? (
+                        <>
+                          <span className="w-3.5 h-3.5 border-2 border-black border-t-transparent rounded-full animate-spin" />
+                          Mengekstrak...
+                        </>
+                      ) : (
+                        "Ekstrak dengan AI"
+                      )}
+                    </button>
+                  )}
+                </div>
+              </div>
+
               <div>
                 <label className="block text-xs text-white/60 mb-2 font-medium">Isi Aturan/Panduan Hook</label>
                 <textarea
