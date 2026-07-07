@@ -179,17 +179,17 @@ Format keluaran harus jelas dengan pemisah Markdown seperti:
 
 // Fallback Mock data for testing and offline mode
 export function getMockScript(topic: string, platform: string): string {
-  return `### 🌯 SKRIP GENERATED (MOCK OFFLINE MODE)
+  return `### SKRIP GENERATED (MOCK OFFLINE MODE)
 *(Catatan: Masukkan Gemini API Key di Pengaturan untuk hasil AI asli)*
 
-#### 🎯 Pilihan Hook Alternatif
-1. *"Lu bangga makan salad mahal tapi cemas mikirin cicilan? Mending makan kebab ini, sama-sama bikin kenyang tapi gak bikin dompet depresi."*
-2. *"Satu-satunya hal yang konsisten di dunia ini cuma dua: Janji manis mantanmu sama tebalnya daging Kebab Baba Rafi."*
-3. *"Gue heran sama orang yang diet ketat tapi kalau malam nyari postingan mukbang. Sini gue ajarin diet bahagia pake kebab."*
+#### Pilihan Hook Alternatif
+1. "Lu bangga makan salad mahal tapi cemas mikirin cicilan? Mending makan kebab ini, sama-sama bikin kenyang tapi gak bikin dompet depresi."
+2. "Satu-satunya hal yang konsisten di dunia ini cuma dua: Janji manis mantanmu sama tebalnya daging Kebab Baba Rafi."
+3. "Gue heran sama orang yang diet ketat tapi kalau malam nyari postingan mukbang. Sini gue ajarin diet bahagia pake kebab."
 
 ---
 
-#### 🎬 Skrip Video Lengkap (${platform})
+#### Skrip Video Lengkap (${platform})
 - **[Visual: Crew Outlet berdiri di depan penggorengan kebab dengan celemek Baba Rafi, memegang capit makanan dengan gaya berlebihan seperti konduktor orkestra. Wajahnya lelah tapi bersemangat.]**
 - **Crew**: "Lu semua pada sibuk cari ketenangan jiwa ke Bali, ke gunung... bro, ketenangan jiwa tuh murah! Cukup denger suara mentega meleleh di atas wajan kebab gue. *[Dekatkan kamera ke kebab yang sedang dipanggang, suara 'cessss']*."
 - **[Visual: Crew melipat kebab dengan gerakan super cepat, diputar-putar ala bartender akrobatik tapi gagal dikit, lalu dia tersenyum sarkas ke kamera.]**
@@ -199,7 +199,7 @@ export function getMockScript(topic: string, platform: string): string {
 
 ---
 
-#### 💡 Catatan Visual & Properti
+#### Catatan Visual & Properti
 - Gunakan transisi cepat (jump cut) antara muka crew yang lelah dan visual kebab yang sedang dipanggang dekat sekali (*extreme close up*).
 - Properti: Capit besi besar, celemek Baba Rafi, dan ekspresi wajah 'pecicilan tapi tertekan'.
 `;
@@ -215,14 +215,14 @@ export function getMockTranscription(fileName: string): {
 [00:08] Pas digigit... beuh, keju lumer langsung meledak di mulut!
 [00:12] Harganya cuma 20 ribu tapi rasanya kaya bintang lima.
 [00:15] Buruan kalian harus coba ke sini sekarang juga!`,
-    analysis: `### 📊 Analisis Struktur Skrip (${fileName})
-- **Hook (Detik 0-3)**: *"Jadi hari ini gue mau nyobain makanan teraneh yang pernah ada"* -> Memicu rasa penasaran instan (curiosity gap) dengan menggunakan kata provokatif "teraneh".
-- **Visual Retention**: Antrian yang panjang menciptakan *social proof* (bukti bahwa makanan ini enak karena banyak yang rela antre).
-- **Climax/Pacing**: Close up keju yang meleleh merangsang sensor visual lapar penonton (*foodporn*).
+    analysis: `### Analisis Struktur Skrip (${fileName})
+- **Hook (Detik 0-3)**: "Jadi hari ini gue mau nyobain makanan teraneh yang pernah ada" -> Memicu rasa penasaran instan (curiosity gap) dengan menggunakan kata provokatif "teraneh".
+- **Visual Retention**: Antrian yang panjang menciptakan social proof (bukti bahwa makanan ini enak karena banyak yang rela antre).
+- **Climax/Pacing**: Close up keju yang meleleh merangsang sensor visual lapar penonton (foodporn).
 - **CTA**: Cepat dan persuasif tanpa bertele-tele.
 
-### 💡 Ide Adaptasi Baba Rafi (Gaya Sarkas Crew)
+### Ide Adaptasi Baba Rafi (Gaya Sarkas Crew)
 - **Konsep**: Kebalikan dari video asli yang 'teraneh', kita buat 'Kebab Ter-normal'.
-- **Skrip Adaptasi**: *"Hari ini gue mau nunjukin kebab ter-normal di dunia. Gak ada keju yang ditarik sampai satu meter, gak ada emas 24 karat di atasnya. Cuma daging sapi premium melimpah sama saus rahasia yang rasanya konsisten bikin lu gak sedih lagi. Sederhana, kenyang, gak usah banyak gaya."*`,
+- **Skrip Adaptasi**: "Hari ini gue mau nunjukin kebab ter-normal di dunia. Gak ada keju yang ditarik sampai satu meter, gak ada emas 24 karat di atasnya. Cuma daging sapi premium melimpah sama saus rahasia yang rasanya konsisten bikin lu gak sedih lagi. Sederhana, kenyang, gak usah banyak gaya."`,
   };
 }

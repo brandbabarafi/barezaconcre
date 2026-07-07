@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -166,8 +167,8 @@ export default function Home() {
       setIsEditingScript(true);
       setStatusMessage("Skrip berhasil dibuat!");
       setTimeout(() => setStatusMessage(""), 2000);
-    } catch (err: any) {
-      setErrorMessage(err.message || "Gagal membuat skrip.");
+    } catch (err: unknown) {
+      setErrorMessage(err instanceof Error ? err.message : "Gagal membuat skrip.");
       setStatusMessage("");
     } finally {
       setLoading(false);
@@ -297,8 +298,8 @@ export default function Home() {
       };
       saveResearchesToStorage([newResearchItem, ...researches]);
 
-    } catch (err: any) {
-      setErrorMessage(err.message || "Gagal melakukan analisis video.");
+    } catch (err: unknown) {
+      setErrorMessage(err instanceof Error ? err.message : "Gagal melakukan analisis video.");
       setStatusMessage("");
     } finally {
       setLoading(false);
@@ -336,7 +337,7 @@ export default function Home() {
     return text
       .split("\n")
       .map((line, idx) => {
-        let clean = line;
+        const clean = line;
         
         // Headers
         if (line.startsWith("### ")) {
@@ -402,10 +403,10 @@ export default function Home() {
       <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-10 pb-6 border-b border-white/5">
         <div>
           <h1 className="text-3xl font-black tracking-tight text-white flex items-center gap-2">
-            Barezaconcre <span className="text-2xl">🌯</span>
+            Barezaconcre
           </h1>
           <p className="text-white/50 text-sm mt-1">
-            Asisten Kreator Kebab Turki Baba Rafi &bull; Crew Outlet Pecicilan & Sarkas
+            Asisten Kreator Kebab Turki Baba Rafi
           </p>
         </div>
         
@@ -446,31 +447,31 @@ export default function Home() {
           onClick={() => setActiveTab("dashboard")}
           className={`px-5 py-2.5 font-medium text-sm glass-tab ${activeTab === "dashboard" ? "active" : ""}`}
         >
-          🗂 Pipeline Konten
+          Pipeline Konten
         </button>
         <button
           onClick={() => setActiveTab("script-writer")}
           className={`px-5 py-2.5 font-medium text-sm glass-tab ${activeTab === "script-writer" ? "active" : ""}`}
         >
-          ✍️ AI Script Writer
+          AI Script Writer
         </button>
         <button
           onClick={() => setActiveTab("fyp-analyzer")}
           className={`px-5 py-2.5 font-medium text-sm glass-tab ${activeTab === "fyp-analyzer" ? "active" : ""}`}
         >
-          🔍 Bedah FYP Video
+          Bedah FYP Video
         </button>
         <button
           onClick={() => setActiveTab("hook-trainer")}
           className={`px-5 py-2.5 font-medium text-sm glass-tab ${activeTab === "hook-trainer" ? "active" : ""}`}
         >
-          📚 Latih Hook AI
+          Latih Hook AI
         </button>
         <button
           onClick={() => setActiveTab("settings")}
           className={`px-5 py-2.5 font-medium text-sm glass-tab ${activeTab === "settings" ? "active" : ""}`}
         >
-          ⚙️ Pengaturan
+          Pengaturan
         </button>
       </nav>
 
@@ -497,7 +498,7 @@ export default function Home() {
                   <label className="block text-xs text-white/50 mb-1.5 font-medium">Platform Utama</label>
                   <select
                     value={newPlatform}
-                    onChange={(e) => setNewPlatform(e.target.value as any)}
+                    onChange={(e) => setNewPlatform(e.target.value as "TikTok" | "Instagram Reels" | "Both")}
                     className="w-full px-3 py-2.5 bg-[#161622] border border-white/10 rounded-xl focus:outline-none focus:border-white/30 text-sm text-white"
                   >
                     <option value="TikTok">TikTok</option>
@@ -525,7 +526,7 @@ export default function Home() {
 
               {/* Hook tips box */}
               <div className="mt-6 p-4 rounded-xl bg-white/[0.02] border border-white/5">
-                <span className="text-xs text-white/40 block mb-1">💡 Tips Crew Hari Ini</span>
+                <span className="text-xs text-white/40 block mb-1">Tips Crew Hari Ini</span>
                 <p className="text-xs text-white/60 leading-relaxed italic">
                   &quot;Konten makanan jangan melulu shoot kebab digigit doang. Penonton bosan. Pancing pake masalah hidup dulu di 3 detik pertama, baru kasih solusi kebab.&quot;
                 </p>
@@ -560,13 +561,13 @@ export default function Home() {
                           </span>
                         )}
                         <span className="text-xs text-white/40 block mb-1">
-                          {item.platform === "Both" ? "🎥 TikTok + Reels" : item.platform === "TikTok" ? "🎵 TikTok" : "📸 Reels"}
+                          {item.platform === "Both" ? "TikTok + Reels" : item.platform === "TikTok" ? "TikTok" : "Reels"}
                         </span>
                         <h4 className="font-bold text-white text-sm leading-snug line-clamp-2">{item.title}</h4>
                         {item.idea && <p className="text-xs text-white/50 mt-2 line-clamp-2 italic">{item.idea}</p>}
                         
                         <div className="flex justify-between items-center mt-4 pt-3 border-t border-white/5 text-[11px] text-white/40">
-                          <span>📅 {item.publishDate}</span>
+                          <span>Publish: {item.publishDate}</span>
                           <span className="text-white font-medium hover:underline flex items-center gap-1">
                             Buka Detail &rarr;
                           </span>
@@ -600,7 +601,7 @@ export default function Home() {
                         className="glass-card p-4 rounded-xl cursor-pointer border-yellow-500/20"
                       >
                         <span className="text-xs text-white/40 block mb-1">
-                          {item.platform === "Both" ? "🎥 TikTok + Reels" : item.platform === "TikTok" ? "🎵 TikTok" : "📸 Reels"}
+                          {item.platform === "Both" ? "TikTok + Reels" : item.platform === "TikTok" ? "TikTok" : "Reels"}
                         </span>
                         <h4 className="font-bold text-white text-sm leading-snug line-clamp-2">{item.title}</h4>
                         <div className="mt-3 flex gap-1.5 flex-wrap">
@@ -609,7 +610,7 @@ export default function Home() {
                           </span>
                         </div>
                         <div className="flex justify-between items-center mt-4 pt-3 border-t border-white/5 text-[11px] text-white/40">
-                          <span>📅 {item.publishDate}</span>
+                          <span>Publish: {item.publishDate}</span>
                           <span className="text-white font-medium hover:underline flex items-center gap-1">
                             Buka Detail &rarr;
                           </span>
@@ -643,7 +644,7 @@ export default function Home() {
                         className={`glass-card p-4 rounded-xl cursor-pointer ${item.status === "Published" ? "border-blue-500/20 opacity-80" : "border-emerald-500/20"}`}
                       >
                         <span className="text-xs text-white/40 block mb-1">
-                          {item.platform === "Both" ? "🎥 TikTok + Reels" : item.platform === "TikTok" ? "🎵 TikTok" : "📸 Reels"}
+                          {item.platform === "Both" ? "TikTok + Reels" : item.platform === "TikTok" ? "TikTok" : "Reels"}
                         </span>
                         <h4 className="font-bold text-white text-sm leading-snug line-clamp-2">{item.title}</h4>
                         <div className="mt-2 flex gap-1.5 flex-wrap">
@@ -658,7 +659,7 @@ export default function Home() {
                           )}
                         </div>
                         <div className="flex justify-between items-center mt-4 pt-3 border-t border-white/5 text-[11px] text-white/40">
-                          <span>📅 {item.publishDate}</span>
+                          <span>Publish: {item.publishDate}</span>
                           <span className="text-white font-medium hover:underline flex items-center gap-1">
                             Buka Detail &rarr;
                           </span>
@@ -717,7 +718,7 @@ export default function Home() {
                 </div>
 
                 <div className="p-3 bg-white/[0.02] border border-white/5 rounded-xl text-xs text-white/50 leading-relaxed">
-                  📢 **Karakter Terpasang**: Crew Outlet Baba Rafi yang banyak akal, pecicilan, ramah tapi sangat sarkas.
+                  **Karakter Terpasang**: Crew Outlet Baba Rafi yang banyak akal, pecicilan, ramah tapi sangat sarkas.
                 </div>
 
                 <button
@@ -732,7 +733,7 @@ export default function Home() {
                       Sedang Meracik Skrip...
                     </>
                   ) : (
-                    "🔥 Buat Skrip Sarkas"
+                    "Buat Skrip Sarkas"
                   )}
                 </button>
               </div>
@@ -769,7 +770,6 @@ export default function Home() {
                   )
                 ) : (
                   <div className="flex-1 border border-dashed border-white/10 rounded-xl flex flex-col items-center justify-center p-8 text-center text-white/30">
-                    <span className="text-3xl mb-2">💡</span>
                     <p className="text-xs max-w-sm">
                       Ketikkan topik di panel kiri lalu klik tombol untuk meminta AI crew outlet menuliskan ide skrip sarkas beserta 3 opsi hooknya.
                     </p>
@@ -783,7 +783,7 @@ export default function Home() {
                     onClick={handleSaveScriptToPipeline}
                     className="flex-1 py-2.5 glass-button-primary text-sm rounded-xl font-bold"
                   >
-                    📥 Simpan ke Pipeline
+                    Simpan ke Pipeline
                   </button>
                   <button
                     onClick={() => {
@@ -828,7 +828,9 @@ export default function Home() {
                     id="video-upload"
                   />
                   <label htmlFor="video-upload" className="cursor-pointer block">
-                    <span className="text-3xl block mb-2">🎵</span>
+                    <svg className="w-8 h-8 mx-auto mb-2 text-white/60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                    </svg>
                     <span className="text-xs font-semibold text-white block">
                       {selectedFile ? selectedFile.name : "Pilih File Audio/Video"}
                     </span>
@@ -850,7 +852,7 @@ export default function Home() {
                       Menganalisis Konten...
                     </>
                   ) : (
-                    "🔍 Mulai Bedah Video"
+                    "Mulai Bedah Video"
                   )}
                 </button>
               </div>
@@ -870,7 +872,7 @@ export default function Home() {
                     >
                       <span className="font-semibold text-white block truncate">{res.fileName}</span>
                       <span className="text-[10px] text-white/40 block mt-0.5">
-                        📅 {new Date(res.createdAt).toLocaleDateString()}
+                        Tanggal: {new Date(res.createdAt).toLocaleDateString()}
                       </span>
                     </div>
                   ))}
@@ -892,21 +894,20 @@ export default function Home() {
                   <div className="space-y-6">
                     {/* Transcription Segment */}
                     <div className="p-4 bg-black/35 border border-white/10 rounded-xl">
-                      <h4 className="text-xs font-bold uppercase tracking-widest text-white/55 mb-2.5">📝 Transkrip Asli Video</h4>
+                      <h4 className="text-xs font-bold uppercase tracking-widest text-white/55 mb-2.5">Transkrip Asli Video</h4>
                       <p className="text-sm text-white/85 leading-relaxed font-mono whitespace-pre-line">
                         {fypOutput.transcription}
                       </p>
                     </div>
-
+ 
                     {/* Analysis Segment */}
                     <div className="p-4 bg-white/[0.01] border border-white/5 rounded-xl leading-relaxed">
-                      <h4 className="text-xs font-bold uppercase tracking-widest text-white/55 mb-2.5">📊 Bedahan Struktur & Ide Adaptasi</h4>
+                      <h4 className="text-xs font-bold uppercase tracking-widest text-white/55 mb-2.5">Bedahan Struktur & Ide Adaptasi</h4>
                       {renderMarkdown(fypOutput.analysis)}
                     </div>
                   </div>
                 ) : (
                   <div className="h-full flex flex-col items-center justify-center text-center text-white/30 p-10">
-                    <span className="text-3xl mb-2">🔬</span>
                     <p className="text-xs max-w-sm leading-relaxed">
                       Hasil transkrip, analisis taktik retensi, serta ide modifikasi instan bertema Kebab Turki Baba Rafi akan muncul di sini setelah pemrosesan selesai.
                     </p>
@@ -922,7 +923,7 @@ export default function Home() {
       {activeTab === "hook-trainer" && (
         <div className="max-w-3xl mx-auto w-full">
           <div className="glass-container p-6 md:p-8 rounded-2xl">
-            <h3 className="text-2xl font-bold mb-2 text-white">📚 Latih AI dengan Dokumen Hook</h3>
+            <h3 className="text-2xl font-bold mb-2 text-white">Latih AI dengan Dokumen Hook</h3>
             <p className="text-white/50 text-xs mb-6 leading-relaxed">
               Anda memiliki dokumen pembelajaran Hook yang paling memikat? Salin isi teks dari file PDF tersebut dan tempelkan ke dalam kolom di bawah ini. AI Barezaconcre akan merekam aturan tersebut sebagai basis utama pembuatan hook di semua skrip selanjutnya.
             </p>
@@ -960,7 +961,7 @@ export default function Home() {
       {activeTab === "settings" && (
         <div className="max-w-2xl mx-auto w-full">
           <div className="glass-container p-6 md:p-8 rounded-2xl">
-            <h3 className="text-2xl font-bold mb-2 text-white">⚙️ Konfigurasi API & Integrasi</h3>
+            <h3 className="text-2xl font-bold mb-2 text-white">Konfigurasi API & Integrasi</h3>
             <p className="text-white/50 text-xs mb-6">
               Atur kredensial Anda di sini agar aplikasi dapat terhubung ke AI Google Gemini dan folder Google Drive secara langsung. Semua data disimpan secara lokal di browser Anda.
             </p>
@@ -1015,7 +1016,7 @@ export default function Home() {
             <div className="p-5 border-b border-white/10 flex justify-between items-start">
               <div>
                 <span className="text-xs text-white/40 block mb-1">
-                  {activeContentDetail.platform === "Both" ? "🎥 TikTok + Reels" : activeContentDetail.platform === "TikTok" ? "🎵 TikTok" : "📸 Reels"}
+                  {activeContentDetail.platform === "Both" ? "TikTok + Reels" : activeContentDetail.platform === "TikTok" ? "TikTok" : "Reels"}
                 </span>
                 <h3 className="text-lg font-bold text-white leading-tight">{activeContentDetail.title}</h3>
               </div>
@@ -1038,7 +1039,7 @@ export default function Home() {
               {isManagerPreview ? (
                 <div className="p-5 bg-white/[0.02] border border-white/10 rounded-2xl space-y-4">
                   <h4 className="text-sm font-bold text-yellow-400 flex items-center gap-2">
-                    🛡️ Simulator Approval Manajer
+                    Simulator Approval Manajer
                   </h4>
                   <p className="text-xs text-white/60 leading-relaxed">
                     Halaman ini menyimulasikan halaman publik aman yang Anda bagikan ke Manajer/Owner untuk review skrip tanpa mewajibkan mereka login.
@@ -1123,14 +1124,14 @@ export default function Home() {
                           rel="noreferrer"
                           className="text-xs text-blue-400 hover:underline truncate block"
                         >
-                          🔗 Buka File High-Res
+                          Buka File High-Res
                         </a>
                       ) : (
                         <button
                           onClick={() => handleDriveUploadMock(activeContentDetail.id)}
                           className="text-[11px] text-white/60 hover:text-white underline text-left"
                         >
-                          📤 Hubungkan File Edit (Simulasi)
+                          Hubungkan File Edit (Simulasi)
                         </button>
                       )}
                     </div>
@@ -1140,7 +1141,7 @@ export default function Home() {
                   {activeContentDetail.status === "Revision" && activeContentDetail.revisionNotes && (
                     <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl">
                       <h4 className="text-xs font-bold text-red-400 mb-1 flex items-center gap-1">
-                        ⚠️ Catatan Revisi dari Manajer:
+                        Catatan Revisi dari Manajer:
                       </h4>
                       <p className="text-xs text-white/80 leading-relaxed italic">
                         &quot;{activeContentDetail.revisionNotes}&quot;
@@ -1164,7 +1165,6 @@ export default function Home() {
                       <span>📜 Skrip Video</span>
                       <button
                         onClick={() => {
-                          const updatedPrompt = `Buatkan ulang skrip dengan topik: ${activeContentDetail.title}`;
                           setScriptTopic(activeContentDetail.title);
                           setScriptPlatform(activeContentDetail.platform === "Instagram Reels" ? "Instagram Reels" : "TikTok");
                           setActiveTab("script-writer");
@@ -1218,7 +1218,7 @@ export default function Home() {
                       }}
                       className="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-black font-bold text-xs rounded-xl"
                     >
-                      🚀 Bagikan Approval Link (Simulasi)
+                      Bagikan Approval Link (Simulasi)
                     </button>
                   )}
                   {activeContentDetail.status === "Approved" && (
@@ -1226,7 +1226,7 @@ export default function Home() {
                       onClick={() => handleUpdateStatus(activeContentDetail.id, "Published")}
                       className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white font-bold text-xs rounded-xl"
                     >
-                      📢 Set Status Live (Publish)
+                      Set Status Live (Publish)
                     </button>
                   )}
                   <button
