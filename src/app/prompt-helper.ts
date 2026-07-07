@@ -1,4 +1,5 @@
 // prompt-helper.ts
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 export const BrandVoiceInstruction = `
 Kamu adalah seorang Crew Outlet Kebab Turki Baba Rafi yang cerdas, pecicilan (sangat aktif, heboh, tidak bisa diam), banyak akal (selalu punya solusi cerdik), ramah kepada pembeli namun memiliki selera humor yang sangat sarkas, sinis secara jenaka, dan suka menyindir realita sosial sehari-hari atau tren medsos terkini. 
@@ -38,51 +39,6 @@ Tulis seluruhnya dalam Bahasa Indonesia gaul yang sangat natural dan luwes.
 `;
 }
 
-// Client-side call to Gemini 1.5 Flash API
-export async function generateScriptWithGemini(
-  apiKey: string,
-  topic: string,
-  hookKnowledge: string,
-  platform: string
-): Promise<string> {
-  const systemPrompt = buildSystemPrompt(hookKnowledge);
-  const userPrompt = buildGenerationPrompt(topic, platform);
-
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
-
-  const response = await fetch(url, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      contents: [
-        {
-          parts: [{ text: userPrompt }]
-        }
-      ],
-      systemInstruction: {
-        parts: [{ text: systemPrompt }]
-      },
-      generationConfig: {
-        temperature: 0.85,
-        maxOutputTokens: 2048,
-      }
-    }),
-  });
-
-  if (!response.ok) {
-    const err = await response.json();
-    throw new Error(err.error?.message || "Gagal menghubungi API Gemini");
-  }
-
-  const data = await response.json();
-  const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-  if (!text) throw new Error("Format respons Gemini tidak valid.");
-  
-  return text;
-}
-
 // Convert file to Base64 helper
 export function fileToBase64(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -96,6 +52,28 @@ export function fileToBase64(file: File): Promise<string> {
   });
 }
 
+// Client-side call to Gemini 1.5 Flash API
+export async function generateScriptWithGemini(
+  apiKey: string,
+  topic: string,
+  hookKnowledge: string,
+  platform: string
+): Promise<string> {
+  const genAI = new GoogleGenerativeAI(apiKey);
+  const model = genAI.getGenerativeModel({ 
+    model: "gemini-1.5-flash",
+    systemInstruction: buildSystemPrompt(hookKnowledge),
+  });
+
+  const userPrompt = buildGenerationPrompt(topic, platform);
+  const result = await model.generateContent(userPrompt);
+  
+  const text = result.response.text();
+  if (!text) throw new Error("Format respons Gemini tidak valid.");
+  
+  return text;
+}
+
 // Multimodal Call for Video/Audio Transcribe & Analyze
 export async function transcribeAndAnalyzeWithGemini(
   apiKey: string,
@@ -104,7 +82,8 @@ export async function transcribeAndAnalyzeWithGemini(
   const base64Data = await fileToBase64(file);
   const mimeType = file.type;
 
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+  const genAI = new GoogleGenerativeAI(apiKey);
+  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
   const promptText = `
 Tugas Anda adalah membedah video/audio referensi ini untuk kebutuhan riset konten F&B Kebab Baba Rafi.
@@ -127,44 +106,18 @@ Format keluaran harus jelas dengan pemisah Markdown seperti:
 ...
 `;
 
-  const response = await fetch(url, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
+  const inlineData = {
+    inlineData: {
+      data: base64Data,
+      mimeType: mimeType,
     },
-    body: JSON.stringify({
-      contents: [
-        {
-          parts: [
-            {
-              inlineData: {
-                mimeType: mimeType,
-                data: base64Data,
-              },
-            },
-            {
-              text: promptText,
-            },
-          ],
-        },
-      ],
-      generationConfig: {
-        temperature: 0.4,
-        maxOutputTokens: 2048,
-      },
-    }),
-  });
+  };
 
-  if (!response.ok) {
-    const err = await response.json();
-    throw new Error(err.error?.message || "Gagal menganalisis video dengan Gemini");
-  }
+  const result = await model.generateContent([inlineData, promptText]);
+  const text = result.response.text();
 
-  const data = await response.json();
-  const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
   if (!text) throw new Error("Format respons analisis video tidak valid.");
 
-  // Split into transcript and analysis/ideas
   let transcription = "Transkrip gagal dimuat.";
   let analysis = text;
 
@@ -175,6 +128,78 @@ Format keluaran harus jelas dengan pemisah Markdown seperti:
   }
 
   return { transcription, analysis };
+}
+
+// Social Media Link Analysis
+export async function analyzeLinkWithGemini(
+  apiKey: string,
+  link: string
+): Promise<{ transcription: string; analysis: string }> {
+  const genAI = new GoogleGenerativeAI(apiKey);
+  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+  
+  const promptText = `
+Tugas Anda adalah menganalisis link video media sosial (TikTok/Instagram) berikut untuk riset konten F&B Kebab Baba Rafi:
+Link Video: ${link}
+
+Karena Anda tidak dapat memutar video secara langsung, buatlah analisis hipotesis atau berikan saran struktur berdasarkan tren konten:
+1. Tulis perkiraan transkrip atau jalan cerita percakapan berdasarkan tipe video tersebut (jika memungkinkan) atau asumsi kreatif yang logis.
+2. Lakukan analisis struktur skrip:
+   - Apa Hook yang dipakai? Mengapa ini bekerja?
+   - Bagaimana pacing/alur pembahasannya?
+   - Apa pelajaran penting (Key Takeaway) dari video tersebut?
+3. Berikan 1 ide modifikasi / konsep adaptasi konten untuk Kebab Turki Baba Rafi dengan gaya Crew Outlet kita yang pecicilan & sarkas.
+
+Format keluaran harus jelas dengan pemisah Markdown seperti:
+# Transkrip Video
+...
+
+# Analisis Struktur
+- **Hook**: ...
+- **Pacing**: ...
+
+# Ide Adaptasi Baba Rafi
+...
+`;
+
+  const result = await model.generateContent(promptText);
+  const text = result.response.text();
+  if (!text) throw new Error("Format respons analisis link tidak valid.");
+
+  let transcription = "Transkrip tidak tersedia secara langsung untuk tautan eksternal.";
+  let analysis = text;
+
+  if (text.includes("# Transkrip Video")) {
+    const parts = text.split(/# Analisis Struktur|# Ide Adaptasi Baba Rafi/);
+    transcription = parts[0].replace("# Transkrip Video", "").trim();
+    analysis = text.replace(parts[0], "").trim();
+  }
+
+  return { transcription, analysis };
+}
+
+// PDF Hook Guidelines Extractor
+export async function extractHookFromPDFWithGemini(
+  apiKey: string,
+  pdfBase64: string
+): Promise<string> {
+  const genAI = new GoogleGenerativeAI(apiKey);
+  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+  
+  const promptText = "Ekstrak dan rangkum seluruh aturan, panduan, tips, dan contoh pembuatan hook yang ada di dalam dokumen PDF ini. Buatlah menjadi teks aturan panduan yang rapi, padat, dan terstruktur agar dapat digunakan oleh AI penulis skrip sebagai basis panduan utama.";
+
+  const inlineData = {
+    inlineData: {
+      data: pdfBase64,
+      mimeType: "application/pdf",
+    },
+  };
+
+  const result = await model.generateContent([inlineData, promptText]);
+  const text = result.response.text();
+  if (!text) throw new Error("Format respons ekstraksi PDF tidak valid.");
+
+  return text;
 }
 
 // Fallback Mock data for testing and offline mode
@@ -189,7 +214,7 @@ export function getMockScript(topic: string, platform: string): string {
 
 ---
 
-#### Skrip Video Lengkap (${platform})
+#### Skrip Video Lengkap (\${platform})
 - **[Visual: Crew Outlet berdiri di depan penggorengan kebab dengan celemek Baba Rafi, memegang capit makanan dengan gaya berlebihan seperti konduktor orkestra. Wajahnya lelah tapi bersemangat.]**
 - **Crew**: "Lu semua pada sibuk cari ketenangan jiwa ke Bali, ke gunung... bro, ketenangan jiwa tuh murah! Cukup denger suara mentega meleleh di atas wajan kebab gue. *[Dekatkan kamera ke kebab yang sedang dipanggang, suara 'cessss']*."
 - **[Visual: Crew melipat kebab dengan gerakan super cepat, diputar-putar ala bartender akrobatik tapi gagal dikit, lalu dia tersenyum sarkas ke kamera.]**
@@ -227,75 +252,6 @@ export function getMockTranscription(fileName: string): {
   };
 }
 
-// Social Media Link Analysis
-export async function analyzeLinkWithGemini(
-  apiKey: string,
-  link: string
-): Promise<{ transcription: string; analysis: string }> {
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
-  const promptText = `
-Tugas Anda adalah menganalisis link video media sosial (TikTok/Instagram) berikut untuk riset konten F&B Kebab Baba Rafi:
-Link Video: ${link}
-
-Karena Anda tidak dapat memutar video secara langsung, buatlah analisis hipotesis atau berikan saran struktur berdasarkan tren konten:
-1. Tulis perkiraan transkrip atau jalan cerita percakapan berdasarkan tipe video tersebut (jika memungkinkan) atau asumsi kreatif yang logis.
-2. Lakukan analisis struktur skrip:
-   - Apa Hook yang dipakai? Mengapa ini bekerja?
-   - Bagaimana pacing/alur pembahasannya?
-   - Apa pelajaran penting (Key Takeaway) dari video tersebut?
-3. Berikan 1 ide modifikasi / konsep adaptasi konten untuk Kebab Turki Baba Rafi dengan gaya Crew Outlet kita yang pecicilan & sarkas.
-
-Format keluaran harus jelas dengan pemisah Markdown seperti:
-# Transkrip Video
-...
-
-# Analisis Struktur
-- **Hook**: ...
-- **Pacing**: ...
-
-# Ide Adaptasi Baba Rafi
-...
-`;
-
-  const response = await fetch(url, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      contents: [
-        {
-          parts: [{ text: promptText }]
-        }
-      ],
-      generationConfig: {
-        temperature: 0.5,
-        maxOutputTokens: 2048,
-      }
-    }),
-  });
-
-  if (!response.ok) {
-    const err = await response.json();
-    throw new Error(err.error?.message || "Gagal menganalisis link dengan Gemini");
-  }
-
-  const data = await response.json();
-  const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-  if (!text) throw new Error("Format respons analisis link tidak valid.");
-
-  let transcription = "Transkrip tidak tersedia secara langsung untuk tautan eksternal.";
-  let analysis = text;
-
-  if (text.includes("# Transkrip Video")) {
-    const parts = text.split(/# Analisis Struktur|# Ide Adaptasi Baba Rafi/);
-    transcription = parts[0].replace("# Transkrip Video", "").trim();
-    analysis = text.replace(parts[0], "").trim();
-  }
-
-  return { transcription, analysis };
-}
-
 export function getMockLinkAnalysis(link: string): { transcription: string; analysis: string } {
   return {
     transcription: `[Transkrip Tautan Eksternal: ${link}]\nVideo ini diasumsikan sebagai video ulasan makanan viral di mana pembuat konten membahas keunikan rasa dan antrian panjang pembeli.`,
@@ -308,52 +264,4 @@ export function getMockLinkAnalysis(link: string): { transcription: string; anal
 - **Konsep**: Membuat tandingan ulasan makanan lebay.
 - **Skrip Adaptasi**: "Hari ini gue mau nunjukin kebab ter-normal di dunia. Gak ada keju yang ditarik sampai satu meter, gak ada emas 24 karat di atasnya. Cuma daging sapi premium melimpah sama saus rahasia yang rasanya konsisten bikin lu gak sedih lagi. Sederhana, kenyang, gak usah banyak gaya."`
   };
-}
-
-// PDF Hook Guidelines Extractor
-export async function extractHookFromPDFWithGemini(
-  apiKey: string,
-  pdfBase64: string
-): Promise<string> {
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
-  const promptText = "Ekstrak dan rangkum seluruh aturan, panduan, tips, dan contoh pembuatan hook yang ada di dalam dokumen PDF ini. Buatlah menjadi teks aturan panduan yang rapi, padat, dan terstruktur agar dapat digunakan oleh AI penulis skrip sebagai basis panduan utama.";
-
-  const response = await fetch(url, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      contents: [
-        {
-          parts: [
-            {
-              inlineData: {
-                mimeType: "application/pdf",
-                data: pdfBase64
-              }
-            },
-            {
-              text: promptText
-            }
-          ]
-        }
-      ],
-      generationConfig: {
-        temperature: 0.3,
-        maxOutputTokens: 2048,
-      }
-    }),
-  });
-
-  if (!response.ok) {
-    const err = await response.json();
-    throw new Error(err.error?.message || "Gagal memproses file PDF dengan Gemini");
-  }
-
-  const data = await response.json();
-  const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-  if (!text) throw new Error("Format respons ekstraksi PDF tidak valid.");
-
-  return text;
 }
