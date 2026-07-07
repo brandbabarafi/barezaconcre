@@ -173,10 +173,11 @@ export default function Home() {
     setIsSyncing(true);
     fetch(sheetsApiUrl, {
       method: "POST",
+      mode: "no-cors",
       body: JSON.stringify({ key, data: dataStr }),
-      headers: { "Content-Type": "text/plain;charset=utf-8" } // Plain text to avoid CORS preflight in some Apps Script setups
+      headers: { "Content-Type": "text/plain;charset=utf-8" }
     })
-    .then(res => res.json())
+    .then(() => console.log("Sync request dispatched to Cloud"))
     .catch(err => console.error("Error syncing to Cloud:", err))
     .finally(() => setIsSyncing(false));
   };
