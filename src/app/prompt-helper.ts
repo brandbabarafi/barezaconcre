@@ -61,7 +61,7 @@ export async function generateScriptWithGemini(
 ): Promise<string> {
   const genAI = new GoogleGenerativeAI(apiKey);
   const model = genAI.getGenerativeModel({ 
-    model: "gemini-2.0-flash",
+    model: "gemini-1.5-flash",
     systemInstruction: buildSystemPrompt(hookKnowledge),
   });
 
@@ -83,7 +83,7 @@ export async function transcribeAndAnalyzeWithGemini(
   const mimeType = file.type;
 
   const genAI = new GoogleGenerativeAI(apiKey);
-  const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
   const promptText = `
 Tugas Anda adalah membedah video/audio referensi ini untuk kebutuhan riset konten F&B Kebab Baba Rafi.
@@ -136,7 +136,7 @@ export async function analyzeLinkWithGemini(
   link: string
 ): Promise<{ transcription: string; analysis: string }> {
   const genAI = new GoogleGenerativeAI(apiKey);
-  const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
   
   const promptText = `
 Tugas Anda adalah menganalisis link video media sosial (TikTok/Instagram) berikut untuk riset konten F&B Kebab Baba Rafi:
@@ -184,7 +184,7 @@ export async function extractHookFromPDFWithGemini(
   pdfBase64: string
 ): Promise<string> {
   const genAI = new GoogleGenerativeAI(apiKey);
-  const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
   
   const promptText = "Ekstrak dan rangkum seluruh aturan, panduan, tips, dan contoh pembuatan hook yang ada di dalam dokumen PDF ini. Buatlah menjadi teks aturan panduan yang rapi, padat, dan terstruktur agar dapat digunakan oleh AI penulis skrip sebagai basis panduan utama.";
 
