@@ -579,7 +579,7 @@ export default function Home() {
         {/* Top Bar */}
         <header className="topbar">
           <div>
-            <div className="topbar-greeting">{greeting}, Salim.</div>
+            <div className="topbar-greeting">{greeting}, Creator!</div>
             <div className="topbar-meta">
               {navItems.find(n => n.id === activeTab)?.label ?? "Dashboard"}
             </div>
@@ -690,7 +690,7 @@ export default function Home() {
                 </div>
                 
                 <div 
-                  className="space-y-4 min-h-[450px] rounded-xl"
+                  className="space-y-3 min-h-[450px] rounded-xl"
                   onDragOver={handleDragOver}
                   onDrop={(e) => handleDrop(e, "Draft")}
                 >
@@ -701,7 +701,7 @@ export default function Home() {
                         key={item.id}
                         draggable
                         onDragStart={(e) => handleDragStart(e, item.id)}
-                        className="glass-card p-4 rounded-xl relative cursor-grab active:cursor-grabbing"
+                  className="glass-card p-5 rounded-xl relative cursor-grab active:cursor-grabbing"
                       >
                         {item.status === "Revision" && (
                           <span className="absolute top-2 right-2 badge-revision text-[10px] px-2 py-0.5 rounded-full uppercase font-bold">
@@ -728,7 +728,7 @@ export default function Home() {
                             </button>
                             <span 
                               onClick={() => setActiveContentDetail(item)} 
-                              className="text-white font-medium hover:underline inline-flex items-center gap-1 cursor-pointer"
+                              className="font-semibold hover:underline inline-flex items-center gap-1 cursor-pointer" style={{ color: 'var(--text-primary)' }}
                             >
                               Detail &rarr;
                             </span>
@@ -765,7 +765,7 @@ export default function Home() {
                         key={item.id}
                         draggable
                         onDragStart={(e) => handleDragStart(e, item.id)}
-                        className="glass-card p-4 rounded-xl relative cursor-grab active:cursor-grabbing"
+                  className="glass-card p-5 rounded-xl relative cursor-grab active:cursor-grabbing"
                       >
                         <span className="text-xs block mb-1" style={{ color: 'var(--text-tertiary)' }}>
                           {item.platform === "Both" ? "TikTok + Reels" : item.platform === "TikTok" ? "TikTok" : "Reels"}
@@ -796,7 +796,7 @@ export default function Home() {
                             </button>
                             <span 
                               onClick={() => setActiveContentDetail(item)} 
-                              className="text-white font-medium hover:underline inline-flex items-center gap-1 cursor-pointer"
+                              className="font-semibold hover:underline inline-flex items-center gap-1 cursor-pointer" style={{ color: 'var(--text-primary)' }}
                             >
                               Detail &rarr;
                             </span>
@@ -833,7 +833,7 @@ export default function Home() {
                         key={item.id}
                         draggable
                         onDragStart={(e) => handleDragStart(e, item.id)}
-                        className={`glass-card p-4 rounded-xl relative cursor-grab active:cursor-grabbing ${item.status === "Published" ? "opacity-75" : ""}`}
+                        className={`glass-card p-5 rounded-xl relative cursor-grab active:cursor-grabbing ${item.status === "Published" ? "opacity-75" : ""}`}
                       >
                         <span className="text-xs block mb-1" style={{ color: 'var(--text-tertiary)' }}>
                           {item.platform === "Both" ? "TikTok + Reels" : item.platform === "TikTok" ? "TikTok" : "Reels"}
@@ -850,7 +850,7 @@ export default function Home() {
                             </span>
                           )}
                         </div>
-                        <div className="flex justify-between items-center mt-4 pt-3 border-t border-white/5 text-[11px] text-white/40">
+                        <div className="flex justify-between items-center mt-4 pt-3 border-t border-[var(--border-subtle)] text-[11px]" style={{ color: 'var(--text-tertiary)' }}>
                           <span>Publish: {item.publishDate}</span>
                           <div className="flex gap-2 items-center">
                             {item.status === "Approved" && (
@@ -866,7 +866,7 @@ export default function Home() {
                             )}
                             <span 
                               onClick={() => setActiveContentDetail(item)} 
-                              className="text-white font-medium hover:underline inline-flex items-center gap-1 cursor-pointer"
+                              className="font-semibold hover:underline inline-flex items-center gap-1 cursor-pointer" style={{ color: 'var(--text-primary)' }}
                             >
                               Detail &rarr;
                             </span>
@@ -875,7 +875,7 @@ export default function Home() {
                       </div>
                     ))}
                   {contents.filter((c) => c.status === "Approved" || c.status === "Published").length === 0 && (
-                    <div className="text-center py-10 rounded-xl border border-dashed border-white/5 text-white/30 text-xs">
+                    <div className="kanban-empty text-center py-10 rounded-xl text-xs">
                       Kolom kosong
                     </div>
                   )}
