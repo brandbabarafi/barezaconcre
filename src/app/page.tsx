@@ -1337,21 +1337,54 @@ export default function Home() {
                     <div className="col-span-2">
                       <span className="text-[10px] text-white/40 block font-medium uppercase tracking-wider mb-1">Asset Google Drive</span>
                       {activeContentDetail.driveLink ? (
-                        <a
-                          href={activeContentDetail.driveLink}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="text-xs text-blue-400 hover:underline truncate block"
-                        >
-                          Buka File High-Res
-                        </a>
+                        <div className="flex items-center gap-2">
+                          <a
+                            href={activeContentDetail.driveLink}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-xs text-blue-400 hover:underline truncate block max-w-[150px]"
+                          >
+                            Buka File High-Res
+                          </a>
+                          <button
+                            onClick={() => {
+                              const updated = contents.map((c) =>
+                                c.id === activeContentDetail.id ? { ...c, driveLink: "" } : c
+                              );
+                              saveContentsToStorage(updated);
+                              setActiveContentDetail({ ...activeContentDetail, driveLink: "" });
+                            }}
+                            className="text-[10px] text-red-400 hover:text-red-300 underline"
+                          >
+                            Hapus Link
+                          </button>
+                        </div>
                       ) : (
-                        <button
-                          onClick={() => handleDriveUploadMock(activeContentDetail.id)}
-                          className="text-[11px] text-white/60 hover:text-white underline text-left"
-                        >
-                          Hubungkan File Edit (Simulasi)
-                        </button>
+                        <div className="flex flex-col gap-1.5">
+                          <button
+                            onClick={() => {
+                              const userLink = prompt("Masukkan Tautan Google Drive / Video Anda:");
+                              if (userLink) {
+                                const updated = contents.map((c) =>
+                                  c.id === activeContentDetail.id ? { ...c, driveLink: userLink, status: "Published" as const } : c
+                                );
+                                saveContentsToStorage(updated);
+                                setActiveContentDetail({ ...activeContentDetail, driveLink: userLink, status: "Published" });
+                                setStatusMessage("Tautan Google Drive berhasil dihubungkan!");
+                                setTimeout(() => setStatusMessage(""), 2000);
+                              }
+                            }}
+                            className="text-[11px] text-blue-400 hover:underline text-left font-bold"
+                          >
+                            + Tempel Link Google Drive (Manual)
+                          </button>
+                          <button
+                            onClick={() => handleDriveUploadMock(activeContentDetail.id)}
+                            className="text-[10px] text-white/40 hover:text-white/60 text-left italic"
+                          >
+                            atau Hubungkan File Edit (Simulasi)
+                          </button>
+                        </div>
                       )}
                     </div>
                   </div>
