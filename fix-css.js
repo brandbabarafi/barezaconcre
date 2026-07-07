@@ -1,4 +1,7 @@
-@import "tailwindcss";
+const fs = require('fs');
+const path = require('path');
+
+const cssContent = `@import "tailwindcss";
 @plugin "tailwindcss-animate";
 @custom-variant dark (&:is(.dark *));
 
@@ -125,3 +128,7 @@
     @apply bg-background text-foreground;
   }
 }
+`;
+
+fs.writeFileSync(path.join(__dirname, 'src', 'app', 'globals.css'), cssContent, 'utf8');
+console.log('globals.css fixed');
