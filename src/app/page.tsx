@@ -493,13 +493,13 @@ export default function Home() {
         
         // Headers
         if (line.startsWith("### ")) {
-          return <h4 key={idx} className="text-lg font-bold text-white mt-4 mb-2">{line.replace("### ", "")}</h4>;
+          return <h4 key={idx} className="typography-body-strong text-white mt-4 mb-2">{line.replace("### ", "")}</h4>;
         }
         if (line.startsWith("#### ")) {
           return <h5 key={idx} className="text-md font-semibold text-white/90 mt-3 mb-1">{line.replace("#### ", "")}</h5>;
         }
         if (line.startsWith("## ")) {
-          return <h3 key={idx} className="text-xl font-bold text-white mt-5 mb-3 border-b border-white/10 pb-1">{line.replace("## ", "")}</h3>;
+          return <h3 key={idx} className="typography-display-md text-white mt-5 mb-3 border-b border-white/10 pb-1">{line.replace("## ", "")}</h3>;
         }
         if (line.startsWith("# ")) {
           return <h2 key={idx} className="text-2xl font-black text-white mt-6 mb-4">{line.replace("# ", "")}</h2>;
@@ -603,70 +603,51 @@ export default function Home() {
   if (!isClient) return null; // Prevent hydration mismatch
 
   return (
-    <div className="app-shell">
-      {/* ===== SIDEBAR ===== */}
-      <aside className="sidebar">
-        {/* Logo */}
-        <div className="sidebar-logo">S</div>
+    <div className="app-container">
+      {/* ===== GLOBAL NAV ===== */}
+      <nav className="global-nav">
+        <div style={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span style={{ fontSize: '18px' }}></span>
+          <span className="typography-caption-strong">Salim Mas Mirza</span>
+        </div>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-1.5" style={{ color: 'var(--color-ink-muted-48)', fontSize: '12px' }}>
+            <span className={`w-1.5 h-1.5 rounded-full ${apiKey ? "bg-emerald-500 animate-pulse" : "bg-gray-500"}`} />
+            Gemini
+          </div>
+          <div className="flex items-center gap-1.5" style={{ color: 'var(--color-ink-muted-48)', fontSize: '12px' }}>
+            <span className={`w-1.5 h-1.5 rounded-full ${driveFolder ? "bg-emerald-500" : "bg-gray-500"}`} />
+            Drive
+          </div>
+          {isSyncing && (
+             <span className="text-[10px] bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full font-bold flex items-center gap-1">
+                Syncing...
+             </span>
+          )}
+        </div>
+      </nav>
 
-        {/* Nav Items */}
-        <nav className="sidebar-nav">
+      {/* ===== SUB NAV FROSTED ===== */}
+      <nav className="sub-nav-frosted">
+        <div className="typography-tagline">{navItems.find(n => n.id === activeTab)?.label ?? "Dashboard"}</div>
+        <div className="flex items-center gap-4 overflow-x-auto no-scrollbar">
           {navItems.map((item) => (
             <button
               key={item.id}
               onClick={() => setActiveTab(item.id)}
-              className={`sidebar-nav-item w-full text-left ${activeTab === item.id ? "active" : ""}`}
+              className={activeTab === item.id ? "button-dark-utility" : "typography-button-utility text-link"}
+              style={activeTab !== item.id ? { color: 'var(--color-ink)', whiteSpace: 'nowrap' } : { whiteSpace: 'nowrap' }}
             >
-              {item.icon}
-              <span className="sidebar-nav-label">{item.label}</span>
+              {item.label}
             </button>
           ))}
-        </nav>
-
-        {/* Bottom — Settings shortcut already in nav */}
-        <div className="sidebar-bottom">
-          <div className="sidebar-nav-item" style={{ opacity: 0.35, cursor: "default", fontSize: 10, paddingTop: 4, paddingBottom: 4 }}>
-            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8} style={{ width: 16, height: 16 }}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M12 2a10 10 0 100 20A10 10 0 0012 2z" />
-            </svg>
-            <span className="sidebar-nav-label" style={{ fontSize: 11 }}>Salim Mas Mirza v1</span>
-          </div>
         </div>
-      </aside>
+      </nav>
 
-      {/* ===== MAIN CONTENT ===== */}
-      <div className="main-content">
-        {/* Top Bar */}
-        <header className="topbar">
-          <div className="flex items-center gap-4">
-            <div className="topbar-greeting">{greeting}, Creator!</div>
-            {isSyncing && (
-              <span className="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-bold animate-pulse flex items-center gap-1">
-                <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-bounce"></span>
-                Syncing...
-              </span>
-            )}
-          </div>
-          <div>
-            <div className="topbar-meta">
-              {navItems.find(n => n.id === activeTab)?.label ?? "Dashboard"}
-            </div>
-          </div>
-          <div className="flex gap-2 text-xs">
-            <div className={`px-3 py-1.5 rounded-full flex items-center gap-1.5 glass-card ${apiKey ? "text-emerald-700" : "text-[var(--text-tertiary)]"}`}>
-              <span className={`w-2 h-2 rounded-full ${apiKey ? "bg-emerald-500 animate-pulse" : "bg-[var(--text-tertiary)]"}`} />
-              Gemini AI: {apiKey ? "Connected" : "Simulated"}
-            </div>
-            <div className={`px-3 py-1.5 rounded-full flex items-center gap-1.5 glass-card ${driveFolder ? "text-emerald-700" : "text-[var(--text-tertiary)]"}`}>
-              <span className={`w-2 h-2 rounded-full ${driveFolder ? "bg-emerald-500" : "bg-[var(--text-tertiary)]"}`} />
-              Drive: {driveFolder ? "Terhubung" : "Belum diatur"}
-            </div>
-          </div>
-        </header>
-
+      <main className="main-content">
         {/* Notifications */}
         {statusMessage && (
-          <div className="fixed top-4 right-4 z-50 px-4 py-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm flex items-center gap-2 shadow-lg animate-fade-in">
+          <div className="fixed top-24 right-4 z-50 px-4 py-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm flex items-center gap-2 product-shadow animate-fade-in">
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
             </svg>
@@ -674,7 +655,7 @@ export default function Home() {
           </div>
         )}
         {errorMessage && (
-          <div className="fixed top-4 right-4 z-50 px-4 py-3 rounded-xl bg-red-50 border border-red-200 text-red-800 text-sm flex items-center gap-2 shadow-lg animate-fade-in">
+          <div className="fixed top-24 right-4 z-50 px-4 py-3 rounded-xl bg-red-50 border border-red-200 text-red-800 text-sm flex items-center gap-2 product-shadow animate-fade-in">
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
             </svg>
@@ -682,8 +663,6 @@ export default function Home() {
           </div>
         )}
 
-        {/* Page Body */}
-        <main className="page-body">
 
 
       {/* TAB CONTENT: PIPELINE DASHBOARD */}
@@ -691,11 +670,11 @@ export default function Home() {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 flex-1">
           {/* Quick Input Bar (Left/Top) */}
           <div className="lg:col-span-1">
-            <div className="glass-container p-6 rounded-2xl sticky top-[80px]">
-              <h3 className="text-lg font-bold mb-4" style={{ color: 'var(--text-primary)' }}>Tambah Ide</h3>
+            <div className="store-utility-card p-6 rounded-2xl sticky top-[80px]">
+              <h3 className="typography-body-strong mb-4" style={{ color: 'var(--text-primary)' }}>Tambah Ide</h3>
               <form onSubmit={handleQuickAddContent} className="space-y-4">
                 <div>
-                  <label className="block text-xs mb-1.5 font-medium" style={{ color: 'var(--text-secondary)' }}>Judul Konten</label>
+                  <label className="block typography-caption mb-1.5 font-medium" >Judul Konten</label>
                   <input
                     type="text"
                     required
@@ -706,7 +685,7 @@ export default function Home() {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs mb-1.5 font-medium" style={{ color: 'var(--text-secondary)' }}>Platform Utama</label>
+                  <label className="block typography-caption mb-1.5 font-medium" >Platform Utama</label>
                   <select
                     value={newPlatform}
                     onChange={(e) => setNewPlatform(e.target.value as "TikTok" | "Instagram Reels" | "Both")}
@@ -718,7 +697,7 @@ export default function Home() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs mb-1.5 font-medium" style={{ color: 'var(--text-secondary)' }}>Premis / Konsep Kasar (Opsional)</label>
+                  <label className="block typography-caption mb-1.5 font-medium" >Premis / Konsep Kasar (Opsional)</label>
                   <textarea
                     rows={3}
                     placeholder="Deskripsi singkat adegan atau cerita..."
@@ -729,7 +708,7 @@ export default function Home() {
                 </div>
                 <button
                   type="submit"
-                  className="w-full py-2.5 glass-button-primary text-sm rounded-xl"
+                  className="w-full py-2.5 button-primary text-sm rounded-xl"
                 >
                   + Tambahkan
                 </button>
@@ -737,8 +716,8 @@ export default function Home() {
 
               {/* Hook tips box */}
               <div className="tips-box mt-6 p-4">
-                <span className="text-xs font-semibold block mb-1" style={{ color: 'var(--text-tertiary)' }}>Tips Crew Hari Ini</span>
-                <p className="text-xs leading-relaxed italic" style={{ color: 'var(--text-secondary)' }}>
+                <span className="typography-caption font-semibold block mb-1" >Tips Crew Hari Ini</span>
+                <p className="typography-caption leading-relaxed italic" >
                   &quot;Konten makanan jangan melulu shoot kebab digigit doang. Penonton bosan. Pancing pake masalah hidup dulu di 3 detik pertama, baru kasih solusi kebab.&quot;
                 </p>
               </div>
@@ -751,7 +730,7 @@ export default function Home() {
               {/* Draft & Revisi Column */}
               <div>
                 <div className="flex justify-between items-center mb-4 px-1">
-                  <h3 className="font-semibold text-sm tracking-wide uppercase flex items-center gap-2" style={{ color: 'var(--text-secondary)' }}>
+                  <h3 className="font-semibold text-sm tracking-wide uppercase flex items-center gap-2" >
                     <span className="w-2.5 h-2.5 rounded-full bg-zinc-400" />
                     Draft & Revisi ({contents.filter((c) => c.status === "Draft" || c.status === "Revision").length})
                   </h3>
@@ -769,20 +748,20 @@ export default function Home() {
                         key={item.id}
                         draggable
                         onDragStart={(e) => handleDragStart(e, item.id)}
-                  className="glass-card p-5 rounded-xl relative cursor-grab active:cursor-grabbing"
+                  className="store-utility-card p-5 rounded-xl relative cursor-grab active:cursor-grabbing"
                       >
                         {item.status === "Revision" && (
                           <span className="absolute top-2 right-2 badge-revision text-[10px] px-2 py-0.5 rounded-full uppercase font-bold">
                             Revisi
                           </span>
                         )}
-                        <span className="text-xs block mb-1" style={{ color: 'var(--text-tertiary)' }}>
+                        <span className="typography-caption block mb-1" >
                           {item.platform === "Both" ? "TikTok + Reels" : item.platform === "TikTok" ? "TikTok" : "Reels"}
                         </span>
                         <h4 className="font-semibold text-sm leading-snug line-clamp-2" style={{ color: 'var(--text-primary)' }}>{item.title}</h4>
-                        {item.idea && <p className="text-xs mt-2 line-clamp-2 italic" style={{ color: 'var(--text-secondary)' }}>{item.idea}</p>}
+                        {item.idea && <p className="typography-caption mt-2 line-clamp-2 italic" >{item.idea}</p>}
                         
-                        <div className="flex justify-between items-center mt-4 pt-3 border-t border-[var(--border-subtle)] text-[11px]" style={{ color: 'var(--text-tertiary)' }}>
+                        <div className="flex justify-between items-center mt-4 pt-3 border-t border-[var(--border-subtle)] text-[11px]" >
                           <span>Publish: {item.publishDate}</span>
                           <div className="flex gap-2 items-center">
                             <button
@@ -805,7 +784,7 @@ export default function Home() {
                       </div>
                     ))}
                   {contents.filter((c) => c.status === "Draft" || c.status === "Revision").length === 0 && (
-                    <div className="kanban-empty text-center py-10 rounded-xl text-xs">
+                    <div className="kanban-empty text-center py-10 rounded-xl typography-caption">
                       Kolom kosong
                     </div>
                   )}
@@ -815,7 +794,7 @@ export default function Home() {
               {/* Waiting Approval Column */}
               <div>
                 <div className="flex justify-between items-center mb-4 px-1">
-                  <h3 className="font-semibold text-sm tracking-wide uppercase flex items-center gap-2" style={{ color: 'var(--text-secondary)' }}>
+                  <h3 className="font-semibold text-sm tracking-wide uppercase flex items-center gap-2" >
                     <span className="w-2.5 h-2.5 rounded-full bg-yellow-400" />
                     Waiting Approval ({contents.filter((c) => c.status === "Waiting Approval").length})
                   </h3>
@@ -833,9 +812,9 @@ export default function Home() {
                         key={item.id}
                         draggable
                         onDragStart={(e) => handleDragStart(e, item.id)}
-                  className="glass-card p-5 rounded-xl relative cursor-grab active:cursor-grabbing"
+                  className="store-utility-card p-5 rounded-xl relative cursor-grab active:cursor-grabbing"
                       >
-                        <span className="text-xs block mb-1" style={{ color: 'var(--text-tertiary)' }}>
+                        <span className="typography-caption block mb-1" >
                           {item.platform === "Both" ? "TikTok + Reels" : item.platform === "TikTok" ? "TikTok" : "Reels"}
                         </span>
                         <h4 className="font-semibold text-sm leading-snug line-clamp-2" style={{ color: 'var(--text-primary)' }}>{item.title}</h4>
@@ -844,7 +823,7 @@ export default function Home() {
                             Menunggu Review
                           </span>
                         </div>
-                        <div className="flex justify-between items-center mt-4 pt-3 border-t border-[var(--border-subtle)] text-[11px]" style={{ color: 'var(--text-tertiary)' }}>
+                        <div className="flex justify-between items-center mt-4 pt-3 border-t border-[var(--border-subtle)] text-[11px]" >
                           <span>Publish: {item.publishDate}</span>
                           <div className="flex gap-2 items-center">
                             <button
@@ -873,7 +852,7 @@ export default function Home() {
                       </div>
                     ))}
                   {contents.filter((c) => c.status === "Waiting Approval").length === 0 && (
-                    <div className="kanban-empty text-center py-10 rounded-xl text-xs">
+                    <div className="kanban-empty text-center py-10 rounded-xl typography-caption">
                       Kolom kosong
                     </div>
                   )}
@@ -883,7 +862,7 @@ export default function Home() {
               {/* Ready to Publish & Live Column */}
               <div>
                 <div className="flex justify-between items-center mb-4 px-1">
-                  <h3 className="font-semibold text-sm tracking-wide uppercase flex items-center gap-2" style={{ color: 'var(--text-secondary)' }}>
+                  <h3 className="font-semibold text-sm tracking-wide uppercase flex items-center gap-2" >
                     <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
                     Approved & Live ({contents.filter((c) => c.status === "Approved" || c.status === "Published").length})
                   </h3>
@@ -901,9 +880,9 @@ export default function Home() {
                         key={item.id}
                         draggable
                         onDragStart={(e) => handleDragStart(e, item.id)}
-                        className={`glass-card p-5 rounded-xl relative cursor-grab active:cursor-grabbing ${item.status === "Published" ? "opacity-75" : ""}`}
+                        className={`store-utility-card p-5 rounded-xl relative cursor-grab active:cursor-grabbing ${item.status === "Published" ? "opacity-75" : ""}`}
                       >
-                        <span className="text-xs block mb-1" style={{ color: 'var(--text-tertiary)' }}>
+                        <span className="typography-caption block mb-1" >
                           {item.platform === "Both" ? "TikTok + Reels" : item.platform === "TikTok" ? "TikTok" : "Reels"}
                         </span>
                         <h4 className="font-semibold text-sm leading-snug line-clamp-2" style={{ color: 'var(--text-primary)' }}>{item.title}</h4>
@@ -918,7 +897,7 @@ export default function Home() {
                             </span>
                           )}
                         </div>
-                        <div className="flex justify-between items-center mt-4 pt-3 border-t border-[var(--border-subtle)] text-[11px]" style={{ color: 'var(--text-tertiary)' }}>
+                        <div className="flex justify-between items-center mt-4 pt-3 border-t border-[var(--border-subtle)] text-[11px]" >
                           <span>Publish: {item.publishDate}</span>
                           <div className="flex gap-2 items-center">
                             {item.status === "Approved" && (
@@ -943,7 +922,7 @@ export default function Home() {
                       </div>
                     ))}
                   {contents.filter((c) => c.status === "Approved" || c.status === "Published").length === 0 && (
-                    <div className="kanban-empty text-center py-10 rounded-xl text-xs">
+                    <div className="kanban-empty text-center py-10 rounded-xl typography-caption">
                       Kolom kosong
                     </div>
                   )}
@@ -959,11 +938,11 @@ export default function Home() {
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 flex-1">
           {/* Inputs Panel */}
           <div className="lg:col-span-2">
-            <div className="glass-container p-6 rounded-2xl">
-              <h3 className="text-xl font-bold mb-4 text-white">Generate Skrip Baru</h3>
+            <div className="store-utility-card p-6 rounded-2xl">
+              <h3 className="typography-display-md mb-4 text-white">Generate Skrip Baru</h3>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-xs text-white/50 mb-1.5 font-medium">Topik / Ide Konten Utama</label>
+                  <label className="block typography-caption text-white/50 mb-1.5 font-medium">Topik / Ide Konten Utama</label>
                   <textarea
                     rows={4}
                     required
@@ -974,7 +953,7 @@ export default function Home() {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-white/50 mb-1.5 font-medium">Platform Media Sosial</label>
+                  <label className="block typography-caption text-white/50 mb-1.5 font-medium">Platform Media Sosial</label>
                   <div className="grid grid-cols-2 gap-2">
                     <button
                       type="button"
@@ -993,7 +972,7 @@ export default function Home() {
                   </div>
                 </div>
 
-                <div className="p-3 bg-white/[0.02] border border-white/5 rounded-xl text-xs text-white/50 leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+                <div className="p-3 bg-white/[0.02] border border-white/5 rounded-xl typography-caption text-white/50 leading-relaxed" >
                   **Karakter Terpasang**: Crew Outlet Baba Rafi yang banyak akal, pecicilan, ramah tapi sangat sarkas.
                 </div>
 
@@ -1001,7 +980,7 @@ export default function Home() {
                   type="button"
                   disabled={loading}
                   onClick={handleGenerateScript}
-                  className="w-full py-3 glass-button-primary text-sm rounded-xl font-bold flex items-center justify-center gap-2"
+                  className="w-full py-3 button-primary text-sm rounded-xl font-bold flex items-center justify-center gap-2"
                 >
                   {loading ? (
                     <>
@@ -1018,13 +997,13 @@ export default function Home() {
 
           {/* Editor/Output Panel */}
           <div className="lg:col-span-3 flex flex-col">
-            <div className="glass-container p-6 rounded-2xl flex-1 flex flex-col min-h-[400px]">
+            <div className="store-utility-card p-6 rounded-2xl flex-1 flex flex-col min-h-[400px]">
               <div className="flex justify-between items-center mb-4">
                 <h3 className="font-bold text-md mb-4" style={{ color: 'var(--text-primary)' }}>Workspace Skrip AI</h3>
                 {generatedScript && (
                   <button
                     onClick={() => setIsEditingScript(!isEditingScript)}
-                    className="text-xs underline" style={{ color: 'var(--text-secondary)' }}
+                    className="typography-caption underline" 
                   >
                     {isEditingScript ? "Pratinjau Hasil" : "Edit Skrip"}
                   </button>
@@ -1045,8 +1024,8 @@ export default function Home() {
                     </div>
                   )
                 ) : (
-                  <div className="flex-1 border-2 border-dashed border-[var(--border)] rounded-xl flex flex-col items-center justify-center p-8 text-center" style={{ color: 'var(--text-tertiary)' }}>
-                    <p className="text-xs max-w-sm">
+                  <div className="flex-1 border-2 border-dashed border-[var(--border)] rounded-xl flex flex-col items-center justify-center p-8 text-center" >
+                    <p className="typography-caption max-w-sm">
                       Ketikkan topik di panel kiri lalu klik tombol untuk meminta AI crew outlet menuliskan ide skrip sarkas beserta 3 opsi hooknya.
                     </p>
                   </div>
@@ -1057,7 +1036,7 @@ export default function Home() {
                 <div className="mt-4 flex gap-2">
                   <button
                     onClick={handleSaveScriptToPipeline}
-                    className="flex-1 py-2.5 glass-button-primary text-sm rounded-xl font-bold"
+                    className="flex-1 py-2.5 button-primary text-sm rounded-xl font-bold"
                   >
                     Simpan ke Pipeline
                   </button>
@@ -1067,7 +1046,7 @@ export default function Home() {
                         setGeneratedScript("");
                       }
                     }}
-                    className="px-4 py-2.5 glass-button-danger text-sm rounded-xl"
+                    className="px-4 py-2.5 button-dark-utility text-sm rounded-xl"
                   >
                     Hapus
                   </button>
@@ -1083,9 +1062,9 @@ export default function Home() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 flex-1">
           {/* Uploader Column */}
           <div className="lg:col-span-1">
-            <div className="glass-container p-6 rounded-2xl">
-              <h3 className="text-xl font-bold mb-4" style={{ color: 'var(--text-primary)' }}>Bedah Video FYP</h3>
-              <p className="text-xs mb-6 leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+            <div className="store-utility-card p-6 rounded-2xl">
+              <h3 className="typography-display-md mb-4" style={{ color: 'var(--text-primary)' }}>Bedah Video FYP</h3>
+              <p className="typography-caption mb-6 leading-relaxed" >
                 Unggah file video atau rekaman suara dari video TikTok/Reels orang lain yang sedang viral. AI akan mengekstrak transkrip percakapan serta membongkar taktik hook-nya untuk kita adaptasi ke Kebab Baba Rafi.
               </p>
 
@@ -1105,20 +1084,20 @@ export default function Home() {
                     id="video-upload"
                   />
                   <label htmlFor="video-upload" className="cursor-pointer block">
-                    <svg className="w-8 h-8 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" style={{ color: 'var(--text-tertiary)' }}>
+                    <svg className="w-8 h-8 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" >
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                     </svg>
-                    <span className="text-xs font-semibold block" style={{ color: 'var(--text-primary)' }}>
+                    <span className="typography-caption font-semibold block" style={{ color: 'var(--text-primary)' }}>
                       {selectedFile ? selectedFile.name : "Pilih File Audio/Video"}
                     </span>
-                    <span className="text-[10px] block mt-1" style={{ color: 'var(--text-tertiary)' }}>
+                    <span className="text-[10px] block mt-1" >
                       {selectedFile ? `${(selectedFile.size / (1024 * 1024)).toFixed(2)} MB` : "MP3, WAV, MP4, MOV (Maks. 20MB)"}
                     </span>
                   </label>
                 </div>
 
                 {/* OR divider */}
-                <div className="flex items-center my-3 text-xs" style={{ color: 'var(--text-tertiary)' }}>
+                <div className="flex items-center my-3 typography-caption" >
                   <div className="flex-1 h-px bg-[var(--border)]" />
                   <span className="px-2">ATAU MASUKKAN LINK</span>
                   <div className="flex-1 h-px bg-[var(--border)]" />
@@ -1134,7 +1113,7 @@ export default function Home() {
                       setVideoLink(e.target.value);
                       if (e.target.value.trim()) setSelectedFile(null);
                     }}
-                    className="w-full px-3 py-2.5 bg-[var(--bg-card-subtle)] border border-[var(--border)] rounded-xl focus:outline-none focus:border-[#999891] text-xs"
+                    className="w-full px-3 py-2.5 bg-[var(--bg-card-subtle)] border border-[var(--border)] rounded-xl focus:outline-none focus:border-[#999891] typography-caption"
                   />
                 </div>
 
@@ -1142,7 +1121,7 @@ export default function Home() {
                   type="button"
                   disabled={loading || (!selectedFile && !videoLink.trim())}
                   onClick={handleAnalyzeVideo}
-                  className="w-full py-3 glass-button-primary text-sm rounded-xl font-bold flex items-center justify-center gap-2 disabled:opacity-50"
+                  className="w-full py-3 button-primary text-sm rounded-xl font-bold flex items-center justify-center gap-2 disabled:opacity-50"
                 >
                   {loading ? (
                     <>
@@ -1157,7 +1136,7 @@ export default function Home() {
 
               {/* History of Researches */}
               <div className="mt-8 pt-6 border-t border-[var(--border-subtle)]">
-                <h4 className="text-xs font-bold uppercase tracking-wider mb-3" style={{ color: 'var(--text-tertiary)' }}>Riwayat Riset Video</h4>
+                <h4 className="typography-caption font-bold uppercase tracking-wider mb-3" >Riwayat Riset Video</h4>
                 <div className="space-y-2 max-h-[200px] overflow-y-auto pr-1">
                   {researches.map((res) => (
                     <div
@@ -1166,16 +1145,16 @@ export default function Home() {
                         setFypOutput({ transcription: res.transcription, analysis: res.analysis });
                         setSelectedFile(null);
                       }}
-                      className="glass-card p-3 rounded-xl text-xs cursor-pointer hover:shadow-sm"
+                      className="store-utility-card p-3 rounded-xl typography-caption cursor-pointer hover:shadow-sm"
                     >
                       <span className="font-semibold block truncate" style={{ color: 'var(--text-primary)' }}>{res.fileName}</span>
-                      <span className="text-[10px] block mt-0.5" style={{ color: 'var(--text-tertiary)' }}>
+                      <span className="text-[10px] block mt-0.5" >
                         Tanggal: {new Date(res.createdAt).toLocaleDateString()}
                       </span>
                     </div>
                   ))}
                   {researches.length === 0 && (
-                    <p className="text-[11px] italic" style={{ color: 'var(--text-tertiary)' }}>Belum ada riwayat analisis video.</p>
+                    <p className="text-[11px] italic" >Belum ada riwayat analisis video.</p>
                   )}
                 </div>
               </div>
@@ -1184,7 +1163,7 @@ export default function Home() {
 
           {/* Analysis Output Column */}
           <div className="lg:col-span-2">
-            <div className="glass-container p-6 rounded-2xl min-h-[450px] flex flex-col">
+            <div className="store-utility-card p-6 rounded-2xl min-h-[450px] flex flex-col">
               <h3 className="font-bold text-md mb-4" style={{ color: 'var(--text-primary)' }}>Hasil Pembedahan AI</h3>
 
               <div className="flex-1 overflow-y-auto max-h-[550px] pr-2">
@@ -1192,7 +1171,7 @@ export default function Home() {
                   <div className="space-y-6">
                     {/* Transcription Segment */}
                     <div className="p-4 bg-[var(--bg-card-subtle)] border border-[var(--border)] rounded-xl">
-                      <h4 className="text-xs font-bold uppercase tracking-widest mb-2.5" style={{ color: 'var(--text-tertiary)' }}>Transkrip Asli Video</h4>
+                      <h4 className="typography-caption font-bold uppercase tracking-widest mb-2.5" >Transkrip Asli Video</h4>
                       <p className="text-sm leading-relaxed font-mono whitespace-pre-line" style={{ color: 'var(--text-primary)' }}>
                         {fypOutput.transcription}
                       </p>
@@ -1200,13 +1179,13 @@ export default function Home() {
  
                     {/* Analysis Segment */}
                     <div className="p-4 bg-[var(--bg-card-subtle)] border border-[var(--border)] rounded-xl leading-relaxed">
-                      <h4 className="text-xs font-bold uppercase tracking-widest mb-2.5" style={{ color: 'var(--text-tertiary)' }}>Bedahan Struktur & Ide Adaptasi</h4>
+                      <h4 className="typography-caption font-bold uppercase tracking-widest mb-2.5" >Bedahan Struktur & Ide Adaptasi</h4>
                       {renderMarkdown(fypOutput.analysis)}
                     </div>
                   </div>
                 ) : (
-                  <div className="h-full flex flex-col items-center justify-center text-center p-10" style={{ color: 'var(--text-tertiary)' }}>
-                    <p className="text-xs max-w-sm leading-relaxed">
+                  <div className="h-full flex flex-col items-center justify-center text-center p-10" >
+                    <p className="typography-caption max-w-sm leading-relaxed">
                       Hasil transkrip, analisis taktik retensi, serta ide modifikasi instan bertema Kebab Turki Baba Rafi akan muncul di sini setelah pemrosesan selesai.
                     </p>
                   </div>
@@ -1220,16 +1199,16 @@ export default function Home() {
       {/* TAB CONTENT: HOOK TRAINER */}
       {activeTab === "hook-trainer" && (
         <div className="max-w-3xl mx-auto w-full">
-          <div className="glass-container p-6 md:p-8 rounded-2xl">
+          <div className="store-utility-card p-6 md:p-8 rounded-2xl">
             <h3 className="text-2xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>Latih AI dengan Dokumen Hook</h3>
-            <p className="text-xs mb-6 leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+            <p className="typography-caption mb-6 leading-relaxed" >
               Anda memiliki dokumen pembelajaran Hook yang paling memikat? Salin isi teks dari file PDF tersebut dan tempelkan ke dalam kolom di bawah ini. AI Salim Mas Mirza akan merekam aturan tersebut sebagai basis utama pembuatan hook di semua skrip selanjutnya.
             </p>
 
             <form onSubmit={handleSaveSettings} className="space-y-6">
               {/* PDF Uploader */}
               <div className="mb-6 p-4 rounded-xl border-2 border-dashed border-[var(--border)] bg-[var(--bg-card-subtle)]">
-                <label className="block text-xs mb-2 font-medium" style={{ color: 'var(--text-secondary)' }}>Unggah Berkas PDF Panduan Hook</label>
+                <label className="block typography-caption mb-2 font-medium" >Unggah Berkas PDF Panduan Hook</label>
                 <div className="flex items-center gap-3">
                   <input
                     type="file"
@@ -1240,11 +1219,11 @@ export default function Home() {
                   />
                   <label
                     htmlFor="hook-pdf-upload"
-                    className="px-4 py-2.5 glass-button border border-[var(--border)] rounded-xl text-xs cursor-pointer font-medium transition"
+                    className="px-4 py-2.5 button-secondary-pill border border-[var(--border)] rounded-xl typography-caption cursor-pointer font-medium transition"
                   >
                     Pilih File PDF
                   </label>
-                  <span className="text-xs" style={{ color: 'var(--text-tertiary)' }}>
+                  <span className="typography-caption" >
                     {hookPDFFile ? hookPDFFile.name : "Format PDF (Maks. 10MB)"}
                   </span>
                   {hookPDFFile && (
@@ -1252,7 +1231,7 @@ export default function Home() {
                       type="button"
                       disabled={loading}
                       onClick={handleExtractHookPDF}
-                      className="px-4 py-2.5 glass-button-primary text-xs rounded-xl font-bold flex items-center gap-1.5 ml-auto"
+                      className="px-4 py-2.5 button-primary typography-caption rounded-xl font-bold flex items-center gap-1.5 ml-auto"
                     >
                       {loading ? (
                         <>
@@ -1268,24 +1247,24 @@ export default function Home() {
               </div>
 
               <div>
-                <label className="block text-xs mb-2 font-medium" style={{ color: 'var(--text-secondary)' }}>Isi Aturan/Panduan Hook</label>
+                <label className="block typography-caption mb-2 font-medium" >Isi Aturan/Panduan Hook</label>
                 <textarea
                   rows={12}
                   required
                   placeholder="Contoh isi PDF Hook:&#10;1. Gunakan 'Curiosity Gap' di 3 detik pertama (Contoh: 'Ini alasan kenapa kamu rugi beli kebab rasa biasa...')."
                   value={hookKnowledge}
                   onChange={(e) => setHookKnowledge(e.target.value)}
-                  className="w-full p-4 bg-[var(--bg-card-subtle)] border border-[var(--border)] rounded-xl focus:outline-none focus:border-[#999891] font-mono text-xs leading-relaxed resize-y"
+                  className="w-full p-4 bg-[var(--bg-card-subtle)] border border-[var(--border)] rounded-xl focus:outline-none focus:border-[#999891] font-mono typography-caption leading-relaxed resize-y"
                 />
               </div>
 
               <div className="flex items-center justify-between pt-4 border-t border-[var(--border-subtle)]">
-                <span className="text-[11px] italic" style={{ color: 'var(--text-tertiary)' }}>
+                <span className="text-[11px] italic" >
                   *Data disimpan langsung di LocalStorage browser Anda (100% Privat).
                 </span>
                 <button
                   type="submit"
-                  className="px-6 py-2.5 glass-button-primary text-sm rounded-xl font-bold"
+                  className="px-6 py-2.5 button-primary text-sm rounded-xl font-bold"
                 >
                   Simpan Aturan Hook
                 </button>
@@ -1298,15 +1277,15 @@ export default function Home() {
       {/* TAB CONTENT: SETTINGS */}
       {activeTab === "settings" && (
         <div className="max-w-2xl mx-auto w-full">
-          <div className="glass-container p-6 md:p-8 rounded-2xl">
+          <div className="store-utility-card p-6 md:p-8 rounded-2xl">
             <h3 className="text-2xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>Konfigurasi API & Integrasi</h3>
-            <p className="text-xs mb-6" style={{ color: 'var(--text-secondary)' }}>
+            <p className="typography-caption mb-6" >
               Atur kredensial Anda di sini agar aplikasi dapat terhubung ke AI Google Gemini dan folder Google Drive secara langsung. Semua data disimpan secara lokal di browser Anda.
             </p>
 
             <form onSubmit={handleSaveSettings} className="space-y-6">
               <div>
-                <label className="block text-xs mb-2 font-medium" style={{ color: 'var(--text-secondary)' }}>Gemini API Key (Google AI Studio)</label>
+                <label className="block typography-caption mb-2 font-medium" >Gemini API Key (Google AI Studio)</label>
                 <input
                   type="password"
                   placeholder="AIzaSy..."
@@ -1314,13 +1293,13 @@ export default function Home() {
                   onChange={(e) => setApiKey(e.target.value)}
                   className="w-full px-3 py-2.5 bg-[var(--bg-card-subtle)] border border-[var(--border)] rounded-xl focus:outline-none focus:border-[#999891] text-sm font-mono"
                 />
-                <span className="text-[10px] block mt-1.5 leading-relaxed" style={{ color: 'var(--text-tertiary)' }}>
+                <span className="text-[10px] block mt-1.5 leading-relaxed" >
                   Dapatkan API Key gratis di Google AI Studio (15 RPM gratis). Jika dikosongkan, web akan otomatis menggunakan simulator/mock-offline agar Anda tetap bisa beraktivitas.
                 </span>
               </div>
 
               <div>
-                <label className="block text-xs mb-2 font-medium" style={{ color: 'var(--text-secondary)' }}>Google Sheets Web App URL (Cloud Sync)</label>
+                <label className="block typography-caption mb-2 font-medium" >Google Sheets Web App URL (Cloud Sync)</label>
                 <input
                   type="url"
                   placeholder="https://script.google.com/macros/s/..."
@@ -1328,13 +1307,13 @@ export default function Home() {
                   onChange={(e) => setSheetsApiUrl(e.target.value)}
                   className="w-full px-3 py-2.5 bg-[var(--bg-card-subtle)] border border-[var(--border)] rounded-xl focus:outline-none focus:border-[#999891] text-sm"
                 />
-                <span className="text-[10px] block mt-1.5 leading-relaxed" style={{ color: 'var(--text-tertiary)' }}>
+                <span className="text-[10px] block mt-1.5 leading-relaxed" >
                   Gunakan Web App URL dari Google Apps Script untuk menyimpan dan sinkronisasi data ke Google Sheets secara real-time. Jika kosong, data hanya tersimpan secara lokal.
                 </span>
               </div>
 
               <div>
-                <label className="block text-xs mb-2 font-medium" style={{ color: 'var(--text-secondary)' }}>Link Folder Google Drive (Asset Storage)</label>
+                <label className="block typography-caption mb-2 font-medium" >Link Folder Google Drive (Asset Storage)</label>
                 <input
                   type="url"
                   placeholder="https://drive.google.com/drive/folders/..."
@@ -1342,7 +1321,7 @@ export default function Home() {
                   onChange={(e) => setDriveFolder(e.target.value)}
                   className="w-full px-3 py-2.5 bg-[var(--bg-card-subtle)] border border-[var(--border)] rounded-xl focus:outline-none focus:border-[#999891] text-sm"
                 />
-                <span className="text-[10px] block mt-1.5 leading-relaxed" style={{ color: 'var(--text-tertiary)' }}>
+                <span className="text-[10px] block mt-1.5 leading-relaxed" >
                   Folder di Drive pribadi Anda untuk menampung video hasil produksi resolusi tinggi langsung dari web.
                 </span>
               </div>
@@ -1350,7 +1329,7 @@ export default function Home() {
               <div className="pt-6 border-t border-[var(--border-subtle)] flex justify-end">
                 <button
                   type="submit"
-                  className="px-6 py-2.5 glass-button-primary text-sm rounded-xl font-bold"
+                  className="px-6 py-2.5 button-primary text-sm rounded-xl font-bold"
                 >
                   Simpan Pengaturan
                 </button>
@@ -1363,21 +1342,21 @@ export default function Home() {
       {/* DASHBOARD DETAIL MODAL */}
       {activeContentDetail && (
         <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="w-full max-w-3xl glass-container rounded-2xl overflow-hidden shadow-2xl max-h-[90vh] flex flex-col animate-fade-in">
+          <div className="w-full max-w-3xl store-utility-card rounded-2xl overflow-hidden max-h-[90vh] flex flex-col animate-fade-in">
             {/* Header Modal */}
             <div className="p-5 border-b border-[var(--border)] flex justify-between items-start">
               <div>
-                <span className="text-xs block mb-1" style={{ color: 'var(--text-tertiary)' }}>
+                <span className="typography-caption block mb-1" >
                   {activeContentDetail.platform === "Both" ? "TikTok + Reels" : activeContentDetail.platform === "TikTok" ? "TikTok" : "Reels"}
                 </span>
-                <h3 className="text-lg font-bold leading-tight" style={{ color: 'var(--text-primary)' }}>{activeContentDetail.title}</h3>
+                <h3 className="typography-body-strong leading-tight" style={{ color: 'var(--text-primary)' }}>{activeContentDetail.title}</h3>
               </div>
               <button
                 onClick={() => {
                   setActiveContentDetail(null);
                   setIsManagerPreview(false);
                 }}
-                className="glass-button p-1.5 rounded-lg transition" style={{ color: 'var(--text-secondary)' }}
+                className="button-secondary-pill p-1.5 rounded-lg transition" 
               >
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -1393,42 +1372,42 @@ export default function Home() {
                   <h4 className="text-sm font-bold flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
                     🔍 Simulator Approval Manajer
                   </h4>
-                  <p className="text-xs leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+                  <p className="typography-caption leading-relaxed" >
                     Halaman ini menyimulasikan halaman publik aman yang Anda bagikan ke Manajer/Owner untuk review skrip tanpa mewajibkan mereka login.
                   </p>
 
                   <div className="p-4 bg-white border border-[var(--border)] rounded-xl text-sm max-h-[200px] overflow-y-auto">
-                    <span className="text-[10px] font-semibold uppercase tracking-wider block mb-2" style={{ color: 'var(--text-tertiary)' }}>Pratinjau Skrip:</span>
+                    <span className="text-[10px] font-semibold uppercase tracking-wider block mb-2" >Pratinjau Skrip:</span>
                     {renderMarkdown(activeContentDetail.script || "*Skrip kosong. Silakan generate skrip terlebih dahulu.*")}
                   </div>
 
                   <div>
-                    <label className="block text-xs mb-1 font-medium" style={{ color: 'var(--text-secondary)' }}>Catatan Revisi (Diisi jika tidak disetujui)</label>
+                    <label className="block typography-caption mb-1 font-medium" >Catatan Revisi (Diisi jika tidak disetujui)</label>
                     <textarea
                       rows={2}
                       value={managerComment}
                       onChange={(e) => setManagerComment(e.target.value)}
                       placeholder="Masukkan catatan perbaikan untuk kreator..."
-                      className="w-full p-2.5 bg-[var(--bg-card-subtle)] border border-[var(--border)] rounded-xl focus:outline-none focus:border-[#999891] text-xs"
+                      className="w-full p-2.5 bg-[var(--bg-card-subtle)] border border-[var(--border)] rounded-xl focus:outline-none focus:border-[#999891] typography-caption"
                     />
                   </div>
 
                   <div className="flex gap-2">
                     <button
                       onClick={() => handleManagerAction(true)}
-                      className="flex-1 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl transition"
+                      className="flex-1 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold typography-caption rounded-xl transition"
                     >
                       Approve &amp; Siap Produksi
                     </button>
                     <button
                       onClick={() => handleManagerAction(false)}
-                      className="flex-1 py-2 border font-semibold text-xs rounded-xl transition" style={{ borderColor: 'var(--border)', color: 'var(--text-secondary)', background: 'var(--bg-card-subtle)' }}
+                      className="flex-1 py-2 border font-semibold typography-caption rounded-xl transition" style={{ borderColor: 'var(--border)', color: 'var(--text-secondary)', background: 'var(--bg-card-subtle)' }}
                     >
                       Minta Revisi
                     </button>
                     <button
                       onClick={() => setIsManagerPreview(false)}
-                      className="px-4 py-2 glass-button text-xs rounded-xl"
+                      className="px-4 py-2 button-secondary-pill typography-caption rounded-xl"
                     >
                       Batal
                     </button>
@@ -1439,8 +1418,8 @@ export default function Home() {
                   {/* Status, Dates and Links */}
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <div>
-                      <span className="text-[10px] font-semibold uppercase tracking-wider block mb-1.5" style={{ color: 'var(--text-tertiary)' }}>Status Konten</span>
-                      <span className={`text-xs px-2.5 py-1 rounded-full font-bold inline-block
+                      <span className="text-[10px] font-semibold uppercase tracking-wider block mb-1.5" >Status Konten</span>
+                      <span className={`typography-caption px-2.5 py-1 rounded-full font-bold inline-block
                         ${activeContentDetail.status === "Draft" ? "badge-draft" : ""}
                         ${activeContentDetail.status === "Waiting Approval" ? "badge-approval" : ""}
                         ${activeContentDetail.status === "Approved" ? "badge-approved" : ""}
@@ -1452,7 +1431,7 @@ export default function Home() {
                     </div>
 
                     <div>
-                      <span className="text-[10px] font-semibold uppercase tracking-wider block mb-1.5" style={{ color: 'var(--text-tertiary)' }}>Jadwal Publish</span>
+                      <span className="text-[10px] font-semibold uppercase tracking-wider block mb-1.5" >Jadwal Publish</span>
                       <input
                         type="date"
                         value={activeContentDetail.publishDate}
@@ -1463,19 +1442,19 @@ export default function Home() {
                           saveContentsToStorage(updated);
                           setActiveContentDetail({ ...activeContentDetail, publishDate: e.target.value });
                         }}
-                        className="bg-[var(--bg-card-subtle)] border border-[var(--border)] rounded-lg px-2 py-1 text-xs focus:outline-none focus:border-[#999891]" style={{ color: 'var(--text-primary)' }}
+                        className="bg-[var(--bg-card-subtle)] border border-[var(--border)] rounded-lg px-2 py-1 typography-caption focus:outline-none focus:border-[#999891]" style={{ color: 'var(--text-primary)' }}
                       />
                     </div>
 
                     <div className="col-span-2 space-y-2">
                       <div className="flex justify-between items-center">
-                        <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--text-tertiary)' }}>Asset Google Drive</span>
+                        <span className="text-[10px] font-semibold uppercase tracking-wider" >Asset Google Drive</span>
                         {driveFolder && (
                           <a
                             href={driveFolder}
                             target="_blank"
                             rel="noreferrer"
-                            className="text-[10px] font-bold hover:underline flex items-center gap-1" style={{ color: 'var(--text-secondary)' }}
+                            className="text-[10px] font-bold hover:underline flex items-center gap-1" 
                           >
                             📂 Buka Folder Drive Utama
                           </a>
@@ -1495,7 +1474,7 @@ export default function Home() {
                             saveContentsToStorage(updated);
                             setActiveContentDetail({ ...activeContentDetail, driveLink: link });
                           }}
-                          className="flex-1 px-3 py-1.5 bg-[var(--bg-card-subtle)] border border-[var(--border)] rounded-xl focus:outline-none focus:border-[#999891] text-xs"
+                          className="flex-1 px-3 py-1.5 bg-[var(--bg-card-subtle)] border border-[var(--border)] rounded-xl focus:outline-none focus:border-[#999891] typography-caption"
                         />
                         {activeContentDetail.driveLink && (
                           <>
@@ -1503,7 +1482,7 @@ export default function Home() {
                               href={activeContentDetail.driveLink}
                               target="_blank"
                               rel="noreferrer"
-                              className="px-3 py-1.5 bg-[var(--text-primary)] hover:opacity-90 text-white border-0 text-xs font-semibold rounded-xl transition shrink-0"
+                              className="px-3 py-1.5 bg-[var(--text-primary)] hover:opacity-90 text-white border-0 typography-caption font-semibold rounded-xl transition shrink-0"
                             >
                               Buka
                             </a>
@@ -1515,7 +1494,7 @@ export default function Home() {
                                 saveContentsToStorage(updated);
                                 setActiveContentDetail({ ...activeContentDetail, driveLink: "" });
                               }}
-                              className="px-3 py-1.5 border border-[var(--border)] text-xs font-semibold rounded-xl transition shrink-0 glass-button"
+                              className="px-3 py-1.5 border border-[var(--border)] typography-caption font-semibold rounded-xl transition shrink-0 button-secondary-pill"
                             >
                               Hapus
                             </button>
@@ -1524,7 +1503,7 @@ export default function Home() {
                         {!activeContentDetail.driveLink && (
                           <button
                             onClick={() => handleDriveUploadMock(activeContentDetail.id)}
-                            className="px-3 py-1.5 glass-button text-xs font-semibold rounded-xl transition shrink-0"
+                            className="px-3 py-1.5 button-secondary-pill typography-caption font-semibold rounded-xl transition shrink-0"
                           >
                             Simulasikan
                           </button>
@@ -1536,10 +1515,10 @@ export default function Home() {
                   {/* Revision Notes Alert */}
                   {activeContentDetail.status === "Revision" && activeContentDetail.revisionNotes && (
                     <div className="p-4 bg-orange-50 border border-orange-200 rounded-xl">
-                      <h4 className="text-xs font-bold text-orange-700 mb-1 flex items-center gap-1">
+                      <h4 className="typography-caption font-bold text-orange-700 mb-1 flex items-center gap-1">
                         ⚠️ Catatan Revisi dari Manajer:
                       </h4>
-                      <p className="text-xs text-orange-800 leading-relaxed italic">
+                      <p className="typography-caption text-orange-800 leading-relaxed italic">
                         &quot;{activeContentDetail.revisionNotes}&quot;
                       </p>
                     </div>
@@ -1548,8 +1527,8 @@ export default function Home() {
                   {/* Premis / Idea */}
                   {activeContentDetail.idea && (
                     <div>
-                      <h4 className="text-xs font-bold uppercase tracking-widest mb-1.5" style={{ color: 'var(--text-tertiary)' }}>Konsep Dasar</h4>
-                      <p className="text-sm pl-3 border-l-2 border-[var(--border)] italic" style={{ color: 'var(--text-secondary)' }}>
+                      <h4 className="typography-caption font-bold uppercase tracking-widest mb-1.5" >Konsep Dasar</h4>
+                      <p className="text-sm pl-3 border-l-2 border-[var(--border)] italic" >
                         {activeContentDetail.idea}
                       </p>
                     </div>
@@ -1557,7 +1536,7 @@ export default function Home() {
 
                   {/* Script body */}
                   <div>
-                    <h4 className="text-xs font-bold uppercase tracking-widest mb-2.5 flex justify-between items-center" style={{ color: 'var(--text-tertiary)' }}>
+                    <h4 className="typography-caption font-bold uppercase tracking-widest mb-2.5 flex justify-between items-center" >
                       <span>📜 Skrip Video</span>
                       <button
                         onClick={() => {
@@ -1566,7 +1545,7 @@ export default function Home() {
                           setActiveTab("script-writer");
                           setActiveContentDetail(null);
                         }}
-                        className="text-[10px] underline lowercase font-medium" style={{ color: 'var(--text-secondary)' }}
+                        className="text-[10px] underline lowercase font-medium" 
                       >
                         {activeContentDetail.script ? "Buat ulang dengan AI" : "Generate skrip sekarang"}
                       </button>
@@ -1578,15 +1557,15 @@ export default function Home() {
                           rows={10}
                           value={activeContentDetail.script}
                           onChange={(e) => handleUpdateScriptBody(activeContentDetail.id, e.target.value)}
-                          className="w-full p-4 bg-[var(--bg-card-subtle)] border border-[var(--border)] rounded-xl focus:outline-none focus:border-[#999891] font-mono text-xs leading-relaxed resize-y"
+                          className="w-full p-4 bg-[var(--bg-card-subtle)] border border-[var(--border)] rounded-xl focus:outline-none focus:border-[#999891] font-mono typography-caption leading-relaxed resize-y"
                         />
                         <div className="p-4 bg-white border border-[var(--border)] rounded-xl max-h-[300px] overflow-y-auto">
-                          <span className="text-[10px] font-semibold uppercase tracking-wider block mb-2" style={{ color: 'var(--text-tertiary)' }}>Pratinjau Tampilan Skrip:</span>
+                          <span className="text-[10px] font-semibold uppercase tracking-wider block mb-2" >Pratinjau Tampilan Skrip:</span>
                           {renderMarkdown(activeContentDetail.script)}
                         </div>
                       </div>
                     ) : (
-                      <div className="py-8 rounded-xl border-2 border-dashed border-[var(--border)] text-center text-xs" style={{ color: 'var(--text-tertiary)' }}>
+                      <div className="py-8 rounded-xl border-2 border-dashed border-[var(--border)] text-center typography-caption" >
                         Belum ada skrip untuk ide ini.
                       </div>
                     )}
@@ -1597,10 +1576,10 @@ export default function Home() {
 
             {/* Footer Modal */}
             {!isManagerPreview && (
-              <div className="p-5 border-t border-[var(--border)] flex justify-between" style={{ background: 'var(--bg-card-subtle)' }}>
+              <div className="p-5 border-t border-[var(--border)] flex justify-between" >
                 <button
                   onClick={() => handleDeleteContent(activeContentDetail.id)}
-                  className="px-4 py-2 text-xs font-semibold rounded-xl transition" style={{ color: 'var(--text-tertiary)' }}
+                  className="px-4 py-2 typography-caption font-semibold rounded-xl transition" 
                 >
                   Hapus Ide
                 </button>
@@ -1612,7 +1591,7 @@ export default function Home() {
                         handleUpdateStatus(activeContentDetail.id, "Waiting Approval");
                         setIsManagerPreview(true);
                       }}
-                      className="px-4 py-2 glass-button-primary font-bold text-xs rounded-xl"
+                      className="px-4 py-2 button-primary font-bold typography-caption rounded-xl"
                     >
                       Bagikan Approval Link (Simulasi)
                     </button>
@@ -1620,14 +1599,14 @@ export default function Home() {
                   {activeContentDetail.status === "Approved" && (
                     <button
                       onClick={() => handleUpdateStatus(activeContentDetail.id, "Published")}
-                      className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl transition"
+                      className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold typography-caption rounded-xl transition"
                     >
                       Set Status Live (Publish)
                     </button>
                   )}
                   <button
                     onClick={() => setActiveContentDetail(null)}
-                    className="px-4 py-2 glass-button text-sm rounded-xl"
+                    className="px-4 py-2 button-secondary-pill text-sm rounded-xl"
                   >
                     Tutup
                   </button>
@@ -1638,7 +1617,6 @@ export default function Home() {
         </div>
       )}
         </main>
-      </div>
     </div>
   );
 }
