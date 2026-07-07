@@ -6,49 +6,98 @@ import {
   PenTool,
   TrendingUp,
   Target,
-  Settings
+  Settings,
+  Store,
+  Briefcase
 } from "lucide-react"
 
+import { NavMain } from "@/components/nav-main"
+import { NavUser } from "@/components/nav-user"
+import { TeamSwitcher } from "@/components/team-switcher"
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarHeader,
-  SidebarMenu,
-  SidebarMenuItem,
-  SidebarMenuButton,
   SidebarRail,
 } from "@/components/ui/sidebar"
 
 export function AppSidebar({ activeTab, setActiveTab, ...props }: React.ComponentProps<typeof Sidebar> & { activeTab: string, setActiveTab: (tab: any) => void }) {
-  const navItems = [
-    { id: "dashboard", label: "Konten Kreasi", icon: LayoutDashboard },
-    { id: "script-writer", label: "AI Script Writer", icon: PenTool },
-    { id: "fyp-analyzer", label: "Bedah FYP Video", icon: TrendingUp },
-    { id: "hook-trainer", label: "Latih Hook AI", icon: Target },
-    { id: "settings", label: "Pengaturan", icon: Settings },
-  ]
+  
+  const data = {
+    user: {
+      name: "Salim Mas Mirza",
+      email: "salim@babarafi.com",
+      avatar: "/avatars/salim.jpg", // placeholder, Shadcn's avatar will handle fallback
+    },
+    teams: [
+      {
+        name: "Baba Rafi",
+        logo: <Store className="size-4" />,
+        plan: "Enterprise",
+      },
+      {
+        name: "Personal Brand",
+        logo: <Briefcase className="size-4" />,
+        plan: "Creator",
+      }
+    ],
+    navMain: [
+      {
+        title: "Workspace",
+        url: "#",
+        icon: <LayoutDashboard />,
+        isActive: true,
+        items: [
+          {
+            title: "Konten Kreasi",
+            url: "#",
+            onClick: () => setActiveTab("dashboard")
+          },
+          {
+            title: "AI Script Writer",
+            url: "#",
+            onClick: () => setActiveTab("script-writer")
+          },
+          {
+            title: "Bedah FYP Video",
+            url: "#",
+            onClick: () => setActiveTab("fyp-analyzer")
+          },
+          {
+            title: "Latih Hook AI",
+            url: "#",
+            onClick: () => setActiveTab("hook-trainer")
+          }
+        ],
+      },
+      {
+        title: "Sistem",
+        url: "#",
+        icon: <Settings />,
+        isActive: false,
+        items: [
+          {
+            title: "Pengaturan",
+            url: "#",
+            onClick: () => setActiveTab("settings")
+          }
+        ],
+      }
+    ],
+  }
 
   return (
-    <Sidebar {...props}>
-      <SidebarHeader className="p-4 border-b">
-         <div className="font-bold text-lg">Salim Mas Mirza</div>
+    <Sidebar collapsible="icon" {...props}>
+      <SidebarHeader>
+        <TeamSwitcher teams={data.teams} />
       </SidebarHeader>
       <SidebarContent>
-        <SidebarMenu className="mt-4 px-2 space-y-1">
-          {navItems.map((item) => (
-            <SidebarMenuItem key={item.id}>
-              <SidebarMenuButton 
-                isActive={activeTab === item.id} 
-                onClick={() => setActiveTab(item.id as any)}
-                tooltip={item.label}
-              >
-                <item.icon />
-                <span>{item.label}</span>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          ))}
-        </SidebarMenu>
+        <NavMain items={data.navMain} />
       </SidebarContent>
+      <SidebarFooter>
+        <NavUser user={data.user} />
+      </SidebarFooter>
       <SidebarRail />
     </Sidebar>
   )

@@ -28,6 +28,7 @@ export function NavMain({
     items?: {
       title: string
       url: string
+      onClick?: () => void
     }[]
   }[]
 }) {
@@ -53,7 +54,19 @@ export function NavMain({
               <SidebarMenuSub>
                 {item.items?.map((subItem) => (
                   <SidebarMenuSubItem key={subItem.title}>
-                    <SidebarMenuSubButton render={<a href={subItem.url} />}>
+                    <SidebarMenuSubButton 
+                      render={
+                        <a 
+                          href={subItem.url} 
+                          onClick={(e) => {
+                            if (subItem.onClick) {
+                              e.preventDefault()
+                              subItem.onClick()
+                            }
+                          }} 
+                        />
+                      }
+                    >
                       <span>{subItem.title}</span>
                     </SidebarMenuSubButton>
                   </SidebarMenuSubItem>
